@@ -20,9 +20,9 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.png"
-                alt="JustHome Logo"
-                width={500}
-                height={500}
+                alt="Punta Cana Real Estate"
+                width={150}
+                height={150}
                 className="w-[150px]"
               />
             </Link>
