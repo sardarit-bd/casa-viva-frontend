@@ -44,8 +44,6 @@ export default function ArticlesSection() {
                         Checkout the latest updates and insights from our experts.
                     </p>
                 </div>
-
-
                 {/* ARTICLE CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                     {articles.map((item, index) => (

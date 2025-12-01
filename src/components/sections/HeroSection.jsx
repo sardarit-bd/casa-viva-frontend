@@ -9,7 +9,6 @@ export default function HeroSection() {
 
                 {/* ---------- LEFT: TEXT + SEARCH BOX ---------- */}
                 <div className="relative pb-16 sm:pb-20 md:pb-24 lg:pb-28 mt-8 sm:mt-12 lg:mt-32">
-
                     {/* TEXT */}
                     <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-3">
                         From as low as $10 per day with limited time offer discounts.
