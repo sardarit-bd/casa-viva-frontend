@@ -1,10 +1,12 @@
-import Properties from '@/components/ui/Properties'
-import React from 'react'
+import CitiesSection from "@/components/sections/CitiesSection";
+import HeroSection from "@/components/sections/HeroSection";
 
-export default function page() {
+
+export default function Home() {
   return (
     <div>
-      <Properties />
+      <HeroSection />
+      <CitiesSection/>
     </div>
-  )
+  );
 }
