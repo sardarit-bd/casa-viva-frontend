@@ -12,7 +12,6 @@ export default function CityCard({ name, properties, img }) {
         height={800}
         className="w-14 h-14 rounded-xl object-cover"
       />
-
       {/* Info */}
       <div>
         <h3 className="font-semibold text-gray-800">{name}</h3>

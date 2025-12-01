@@ -1,10 +1,15 @@
 "use client";
 
+import Image from "next/image";
+
 export default function ArticleCard({ img, category, date, title }) {
   return (
     <div className="rounded-2xl border bg-white shadow-sm hover:shadow-lg transition cursor-pointer">
       {/* IMAGE */}
-      <img
+      <Image
+        width={800}
+        height={600}
+        alt="image"
         src={img}
         className="w-full h-48 rounded-t-2xl object-cover"
       />

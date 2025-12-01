@@ -31,7 +31,6 @@ export default function CitiesSection() {
                         View All Cities →
                     </button>
                 </div>
-
                 {/* CITY CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {cities.map((city, index) => (
@@ -43,7 +42,6 @@ export default function CitiesSection() {
                         />
                     ))}
                 </div>
-
             </div>
         </section>
     );
