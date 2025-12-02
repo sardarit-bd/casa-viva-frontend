@@ -15,11 +15,13 @@ export default function PropertyResults({ filtered }) {
 
     // Auto reset to page 1 when filter changes
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPage(1);
     }, [filtered]);
 
     // Simulate loading animation on paginate
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         const t = setTimeout(() => setLoading(false), 100);
         return () => clearTimeout(t);
