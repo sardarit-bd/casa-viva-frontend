@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { CalendarDays, User } from "lucide-react";
+import Link from "next/link";
 
 export default function BlogCard({
     image,
@@ -10,7 +11,7 @@ export default function BlogCard({
     author,
     date,
     category,
-    slug,
+    id,
 }) {
     return (
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer">
@@ -35,7 +36,9 @@ export default function BlogCard({
 
                 {/* TITLE */}
                 <h3 className="text-[18px] font-semibold text-[#1F2328] leading-snug hover:text-[#0FA958] transition">
-                    {title}
+                    <Link href={`/pages/blog/${id}`}>
+                        {title}
+                    </Link>
                 </h3>
 
                 {/* EXCERPT */}
