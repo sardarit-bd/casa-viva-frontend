@@ -21,8 +21,15 @@ export default function PropertyDetails({ property }) {
         baths,
         sqft,
         type,
-        description = "A beautiful and spacious home designed for modern living. Large open spaces, natural lighting, and peaceful surroundings make this a perfect family home.",
+        description,
+        agent = {
+            name: "Not Assigned",
+            phone: "N/A",
+            email: "N/A",
+            image: "/uploads/agent.jpg"
+        }
     } = property;
+
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -108,7 +115,7 @@ export default function PropertyDetails({ property }) {
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                     Description
                 </h2>
-                <p classname="text-gray-700 leading-relaxed text-[15px] md:text-base">
+                <p className="text-gray-700 leading-relaxed text-[15px] md:text-base">
                     {description}
                 </p>
             </div>
@@ -122,7 +129,7 @@ export default function PropertyDetails({ property }) {
                 <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
 
                     <Image
-                        src="/uploads/agent.jpg"
+                        src={agent.image || "/uploads/agent.jpg"}
                         alt="Agent"
                         width={90}
                         height={90}
@@ -130,16 +137,16 @@ export default function PropertyDetails({ property }) {
                     />
 
                     <div>
-                        <h3 className="text-lg md:text-xl font-semibold">John Doe</h3>
+                        <h3 className="text-lg md:text-xl font-semibold">{agent.name}</h3>
 
                         <div className="flex items-center gap-3 mt-2 text-gray-600">
                             <Phone size={18} />
-                            <span>(123) 456-7890</span>
+                            <span>{agent.phone}</span>
                         </div>
 
                         <div className="flex items-center gap-3 mt-1 text-gray-600">
                             <Mail size={18} />
-                            <span>john.doe@realestate.com</span>
+                            <span>{agent.email}</span>
                         </div>
                     </div>
                 </div>
