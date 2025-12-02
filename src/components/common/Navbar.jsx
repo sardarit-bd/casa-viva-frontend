@@ -31,10 +31,10 @@ export default function Navbar() {
             <nav className="hidden md:flex items-center gap-8 text-sm text-[#1F3A34]">
               <NavItem title="Home" href="/" />
               <NavItem title="About" href="pages/about" />
-              <NavItem title="Services" href="/services" dropdown />
-              <NavItem title="Properties" href="/public/properties" dropdown />
-              <Link href="/public/blog" className="hover:text-black">Blog</Link>
-              <Link href="/contact" className="hover:text-black">Contact</Link>
+              <NavItem title="Services" href="pages/services" dropdown />
+              <NavItem title="Properties" href="/pages/properties" dropdown />
+              <Link href="/pages/blog" className="hover:text-black">Blog</Link>
+              <Link href="/pages/contact" className="hover:text-black">Contact</Link>
             </nav>
           </div>
 
@@ -86,11 +86,11 @@ export default function Navbar() {
         <nav className="flex flex-col px-5 py-4 text-[16px] text-[#1F3A34] gap-4">
 
           <MobileItem title="Home" href="/" />
-          <MobileItem title="About" href="/about" dropdown />
-          <MobileItem title="Services" href="/services" dropdown />
-          <MobileItem title="Properties" href="/properties" dropdown />
-          <MobileItem title="Blog" href="/blog" />
-          <MobileItem title="Contact" href="/contact" />
+          <MobileItem title="About" href="/pages/about" dropdown />
+          <MobileItem title="Services" href="/pages/services" dropdown />
+          <MobileItem title="Properties" href="/pages/properties" dropdown />
+          <MobileItem title="Blog" href="/pages/blog" />
+          <MobileItem title="Contact" href="/pages/contact" />
 
           <div className="mt-6 border-t pt-4">
             <div className="flex items-center gap-2 mb-4">
