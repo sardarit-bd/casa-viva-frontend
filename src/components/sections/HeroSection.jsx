@@ -1,143 +1,231 @@
-import { Search } from "lucide-react";
-import Image from "next/image";
-import { FaCaretDown } from "react-icons/fa";
+"use client";
 
-export default function HeroSection() {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FaSearch, FaCaretDown } from "react-icons/fa";
+
+export default function LuxuryHero() {
+    const router = useRouter();
+
+    // States
+    const [city, setCity] = useState("all");
+    const [type, setType] = useState("all");
+    const [bedrooms, setBedrooms] = useState("all");
+
+    // Dropdown toggles
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+    const toggleDropdown = (field) => {
+        setOpenDropdown(openDropdown === field ? null : field);
+    };
+
+    const handleSelect = (field, value) => {
+        if (field === "city") setCity(value);
+        if (field === "type") setType(value);
+        if (field === "bedrooms") setBedrooms(value);
+        setOpenDropdown(null);
+    };
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+
+        if (city !== "all") params.set("city", city);
+        if (type !== "all") params.set("type", type);
+        if (bedrooms !== "all") params.set("bedrooms", bedrooms);
+
+        router.push(`/pages/properties?${params.toString()}`);
+    };
+
     return (
-        <section className="w-full bg-[#FFF6F2] py-12 sm:py-16 md:py-20 lg:py-28 overflow-hidden">
-            <div className="max-w-7xl mx-auto sm:px-6  grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+        <section
+            className="relative w-full min-h-[75vh] bg-center bg-cover bg-no-repeat flex items-center"
+            style={{ backgroundImage: "url('/images/home-3.webp')" }}
+        >
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/50"></div>
 
-                {/* ---------- LEFT: TEXT + SEARCH BOX ---------- */}
-                <div className="relative pb-16 sm:pb-20 md:pb-24 lg:pb-28 mt-8 sm:mt-12 lg:mt-32">
-                    {/* TEXT */}
-                    <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-3">
-                        From as low as $10 per day with limited time offer discounts.
-                    </p>
+            <div className="relative max-w-7xl mx-auto px-6 py-20 w-full text-center">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight drop-shadow-lg">
+                    Discover Your <span className="text-[#E7C464]">Luxury Home</span>
+                </h1>
 
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium leading-tight sm:leading-tight text-[#113B28]">
-                        Your <span className="text-[#E7C464]">Property</span>, Our Priority.
-                    </h1>
+                <p className="text-gray-200 mt-4 text-sm sm:text-base max-w-2xl mx-auto">
+                    Explore premium villas, ocean-view apartments & luxury residential properties.
+                </p>
 
-                    {/* SEARCH BAR FLOATING */}
-                    <div className="relative w-full mt-8 sm:mt-10 md:mt-12 lg:mt-14">
-                        <div className="absolute w-full lg:w-[150%] -bottom-16 sm:-bottom-20 left-0 right-0 mx-auto bg-white shadow-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-3 sm:gap-4 z-10">
+                {/* SEARCH CARD */}
+                <div className="mt-12 bg-white/20 backdrop-blur-2xl border border-white/30 shadow-2xl rounded-3xl p-6 sm:p-8 max-w-4xl mx-auto">
 
-                            {/* KEYWORD */}
-                            <div className="flex-1 w-full min-w-0">
-                                <label className="text-xs sm:text-sm text-gray-500 block mb-1">Keyword</label>
-                                <div className="py-2 sm:py-3 flex items-center gap-2 border-b lg:border-b-0">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter Keyword"
-                                        className="outline-none flex-1 text-sm sm:text-base w-full min-w-0"
-                                    />
-                                    <span className="text-gray-500 text-lg sm:text-xl"><Search /></span>
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                            {/* STATUS - Hidden on mobile, visible on lg */}
-                            <div className="hidden lg:block flex-1 w-full border-l border-r px-4">
-                                <label className="text-xs sm:text-sm text-gray-500 block mb-1">Status</label>
-                                <div className="relative">
-                                    <select className="appearance-none py-2 sm:py-3 w-full outline-none text-sm sm:text-base bg-transparent">
-                                        <option>All Status</option>
-                                        <option>For Rent</option>
-                                        <option>For Sale</option>
-                                    </select>
-                                    <FaCaretDown className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none text-sm sm:text-base" />
-                                </div>
-                            </div>
+                        {/* ---------- CUSTOM DROPDOWNS ---------- */}
 
-                            {/* TYPE - Hidden on mobile, visible on lg */}
-                            <div className="hidden lg:block flex-1 w-full">
-                                <label className="text-xs sm:text-sm text-gray-500 block mb-1">Type</label>
-                                <div className="relative">
-                                    <select className="appearance-none py-2 sm:py-3 w-full outline-none text-sm sm:text-base bg-transparent">
-                                        <option>All Type</option>
-                                        <option>Apartment</option>
-                                        <option>Villa</option>
-                                        <option>House</option>
-                                    </select>
-                                    <FaCaretDown className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none text-sm sm:text-base" />
-                                </div>
-                            </div>
-
-                            {/* Mobile Dropdowns (combined) */}
-                            <div className="lg:hidden grid grid-cols-2 gap-3 w-full">
-                                {/* STATUS - Mobile */}
-                                <div className="w-full">
-                                    <label className="text-xs sm:text-sm text-gray-500 block mb-1">Status</label>
-                                    <div className="relative">
-                                        <select className="appearance-none py-2 w-full outline-none text-sm border rounded-lg px-3">
-                                            <option>All Status</option>
-                                            <option>For Rent</option>
-                                            <option>For Sale</option>
-                                        </select>
-                                        <FaCaretDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                {/* TYPE - Mobile */}
-                                <div className="w-full">
-                                    <label className="text-xs sm:text-sm text-gray-500 block mb-1">Type</label>
-                                    <div className="relative">
-                                        <select className="appearance-none py-2 w-full outline-none text-sm border rounded-lg px-3">
-                                            <option>All Type</option>
-                                            <option>Apartment</option>
-                                            <option>Villa</option>
-                                            <option>House</option>
-                                        </select>
-                                        <FaCaretDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* BUTTONS CONTAINER */}
-                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto mt-2 lg:mt-0">
-                                {/* FILTER BTN - Mobile only */}
-                                <button className="px-8 py-4 rounded-lg border font-medium hover:bg-gray-100 transition text-sm sm:text-base">
-                                    Filter
-                                </button>
-
-                                {/* SEARCH BTN */}
-                                <button className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-[#E7C464] text-black font-medium sm:font-semibold hover:bg-[#d9b452] transition text-sm sm:text-base w-full sm:w-auto">
-                                    Search
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* POPULAR SEARCH */}
-                    <div className="mt-32 sm:mt-36 md:mt-40 lg:mt-52">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                        <p className="font-medium text-xs sm:text-sm text-gray-600 mb-2">Popular Search</p>
-                            {["Modern Villa", "Studio Apartment", "Town House"].map((item) => (
-                                <span
-                                    key={item}
-                                    className="px-3 sm:px-4 py-1 sm:py-1.5 bg-white rounded-full shadow text-xs sm:text-sm text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                        {/* CITY */}
+                        <div className="text-left text-white">
+                            <label className="text-sm mb-2 block">City</label>
+                            <div className="relative">
+                                <div
+                                    onClick={() => toggleDropdown("city")}
+                                    className="custom-box"
                                 >
-                                    {item}
-                                </span>
-                            ))}
+                                    <span>{city === "all" ? "All Cities" : city}</span>
+                                    <FaCaretDown />
+                                </div>
+
+                                {openDropdown === "city" && (
+                                    <div className="dropdown-panel">
+                                        {["all", "punta-cana", "bavaro", "cocotal", "cap-cana"].map((item) => (
+                                            <div
+                                                key={item}
+                                                className="dropdown-item"
+                                                onClick={() => handleSelect("city", item)}
+                                            >
+                                                {item === "all" ? "All Cities" : item}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* TYPE */}
+                        <div className="text-left text-white">
+                            <label className="text-sm mb-2 block">Type</label>
+                            <div className="relative">
+                                <div
+                                    onClick={() => toggleDropdown("type")}
+                                    className="custom-box"
+                                >
+                                    <span>
+                                        {type === "all"
+                                            ? "All Types"
+                                            : type === "rent"
+                                            ? "For Rent"
+                                            : "For Sale"}
+                                    </span>
+                                    <FaCaretDown />
+                                </div>
+
+                                {openDropdown === "type" && (
+                                    <div className="dropdown-panel">
+                                        <div className="dropdown-item" onClick={() => handleSelect("type", "all")}>
+                                            All Types
+                                        </div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("type", "rent")}>
+                                            For Rent
+                                        </div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("type", "sale")}>
+                                            For Sale
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* BEDROOMS */}
+                        <div className="text-left text-white">
+                            <label className="text-sm mb-2 block">Bedrooms</label>
+                            <div className="relative">
+                                <div
+                                    onClick={() => toggleDropdown("bedrooms")}
+                                    className="custom-box"
+                                >
+                                    <span>
+                                        {
+                                            {
+                                                all: "Any",
+                                                1: "1 Bedroom",
+                                                2: "2 Bedrooms",
+                                                3: "3 Bedrooms",
+                                                4: "4+ Bedrooms",
+                                            }[bedrooms]
+                                        }
+                                    </span>
+                                    <FaCaretDown />
+                                </div>
+
+                                {openDropdown === "bedrooms" && (
+                                    <div className="dropdown-panel">
+                                        <div className="dropdown-item" onClick={() => handleSelect("bedrooms", "all")}>Any</div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("bedrooms", "1")}>1 Bedroom</div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("bedrooms", "2")}>2 Bedrooms</div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("bedrooms", "3")}>3 Bedrooms</div>
+                                        <div className="dropdown-item" onClick={() => handleSelect("bedrooms", "4")}>4+ Bedrooms</div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                </div>
-
-                {/* ---------- RIGHT: SINGLE IMAGE ---------- */}
-                <div className="relative order-first lg:order-last">
-                    <div className="grid grid-cols-1 gap-4">
-                        <Image
-                            src="/images/home-image.png"
-                            alt="Property"
-                            width={1000}
-                            height={1000}
-                            className="w-full h-auto object-cover rounded-2xl sm:rounded-3xl max-h-[400px] sm:max-h-[500px] lg:max-h-none"
-                        />
+                    {/* SEARCH BUTTON */}
+                    <div className="mt-8 flex justify-center">
+                        <button
+                            onClick={handleSearch}
+                            className="luxury-btn"
+                        >
+                            <FaSearch /> Search Properties
+                        </button>
                     </div>
                 </div>
-
             </div>
+
+            {/* EXTRA CSS */}
+            <style>{`
+                .custom-box {
+                    background: rgba(255,255,255,0.9);
+                    color: #05314A;
+                    padding: 14px 18px;
+                    border-radius: 12px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    cursor: pointer;
+                    border: 1px solid #ddd;
+                    font-weight: 500;
+                    transition: 0.2s;
+                }
+                .custom-box:hover {
+                    border-color: #E7C464;
+                }
+                .dropdown-panel {
+                    position: absolute;
+                    width: 100%;
+                    margin-top: 5px;
+                    background: white;
+                    border-radius: 12px;
+                    padding: 8px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                    z-index: 20;
+                }
+                .dropdown-item {
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    color: #05314A;
+                    font-weight: 500;
+                }
+                .dropdown-item:hover {
+                    background: #E7C464;
+                    color: black;
+                }
+                .luxury-btn {
+                    padding: 14px 30px;
+                    background: #E7C464;
+                    color: #05314A;
+                    font-weight: 600;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 15px;
+                    transition: 0.2s;
+                    box-shadow: 0 4px 20px rgba(231,196,100,0.4);
+                }
+                .luxury-btn:hover {
+                    background: #d9b452;
+                }
+            `}</style>
         </section>
     );
 }
