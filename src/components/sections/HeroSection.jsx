@@ -34,7 +34,7 @@ export default function LuxuryHero() {
     };
 
     return (
-        <section className="bg-[#FFF7F3] py-20">
+        <section className="bg-[#FFF7F3] py-30">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
                 {/* LEFT SIDE */}
@@ -155,8 +155,8 @@ export default function LuxuryHero() {
                     <Image
                         src="/images/home-image.png"
                         alt="Luxury Home"
-                        width={600}
-                        height={700}
+                        width={400}
+                        height={600}
                         className="rounded-3xl object-cover"
                     />
 

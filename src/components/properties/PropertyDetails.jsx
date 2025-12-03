@@ -189,7 +189,6 @@ export default function PropertyDetails({ property }) {
                     </div>
                 </div>
             </div>
-
         </section>
     );
 }
