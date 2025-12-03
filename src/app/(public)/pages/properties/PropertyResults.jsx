@@ -48,7 +48,7 @@ export default function PropertyResults({ filtered }) {
                     {currentItems.map((item) => (
                         <Link
                             key={item.id}
-                            href={`/pages/property/${item.id}`}
+                            href={`/pages/properties/${item.id}`}
                             className="block fade-up"
                         >
                             <PropertyCard
