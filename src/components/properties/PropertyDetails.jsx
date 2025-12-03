@@ -14,6 +14,7 @@ export default function PropertyDetails({ property }) {
 
     const {
         image,
+        images = [],
         title,
         price,
         address,
@@ -26,10 +27,9 @@ export default function PropertyDetails({ property }) {
             name: "Not Assigned",
             phone: "N/A",
             email: "N/A",
-            image: "/uploads/agent.jpg"
-        }
+            image: "/uploads/agent.jpg",
+        },
     } = property;
-
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -37,7 +37,7 @@ export default function PropertyDetails({ property }) {
             {/* TOP SECTION */}
             <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-start">
 
-                {/* IMAGE */}
+                {/* MAIN IMAGE */}
                 <div className="relative w-full h-[280px] sm:h-[380px] md:h-[480px] lg:h-[520px] rounded-2xl overflow-hidden shadow-md bg-gray-100">
                     <Image
                         src={image}
@@ -73,7 +73,6 @@ export default function PropertyDetails({ property }) {
                         </h2>
 
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-5 text-gray-700">
-
                             <div className="flex items-center gap-3">
                                 <BedDouble size={24} className="text-gray-500" />
                                 <div>
@@ -106,11 +105,32 @@ export default function PropertyDetails({ property }) {
                         </div>
                     </div>
 
-                </div>
+                    {/* IMAGE GALLERY (3 images) */}
+                    <div className="grid grid-cols-3 gap-5 mt-4">
+                        {[images[1], images[2], images[3]].map((img, i) => (
+                            <div
+                                key={i}
+                                className="w-full h-28 border rounded-xl overflow-hidden flex items-center justify-center bg-white"
+                            >
+                                {img ? (
+                                    <Image
+                                        src={img}
+                                        alt={`Gallery ${i + 1}`}
+                                        width={100}
+                                        height={100}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-red-500 text-sm">Image</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
 
+                </div>
             </div>
 
-            {/* DESCRIPTION SECTION */}
+            {/* DESCRIPTION */}
             <div className="bg-white border rounded-xl p-5 md:p-7 shadow-sm">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                     Description
@@ -120,20 +140,20 @@ export default function PropertyDetails({ property }) {
                 </p>
             </div>
 
+            {/* MAP SECTION */}
             <div className="map">
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8976.524870225803!2d-68.41150214321561!3d18.495511638412378!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8ea890ba67c733c1%3A0x7a0111a8ec90305b!2sCap%20Cana%2C%2023000%20Punta%20Cana%2C%20Dominican%20Republic!5e1!3m2!1sen!2sbd!4v1764738996752!5m2!1sen!2sbd"
                     height="450"
+                    className="w-full rounded-xl"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
-                    className="w-full"
                     referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
             </div>
 
-
-            {/* CONTACT SECTION */}
+            {/* CONTACT AGENT */}
             <div className="bg-white border rounded-xl p-5 md:p-7 shadow-sm">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-5">
                     Contact Agent
