@@ -20,10 +20,10 @@ const initialProperties = [
         city: "punta-cana",
         description: "A beautiful apartment with stunning views and modern amenities. Perfect for urban living",
         agent: {
-            name: "Ashiqur Rahman",
+            name: "Ahsan Alam",
             phone: "(123) 456-7890",
             email: "R9yQ2@example.com55",
-            image: "/uploads/agent.png"
+            image: "/images/agent2.png"
         }
     },
     {
@@ -70,10 +70,10 @@ const initialProperties = [
         city: "cocotal",
         description: "A beautiful apartment with stunning views and modern amenities. Perfect for urban living",
         agent: {
-            name: "Ashiqur Rahman",
+            name: "Ahsan Alam",
             phone: "(123) 456-7890",
             email: "R9yQ2@example.com55",
-            image: "/uploads/agent.png"
+            image: "/images/agent2.png"
         }
     },
     {
@@ -121,10 +121,10 @@ const initialProperties = [
         city: "punta-cana",
         description: "A beautiful apartment with stunning views and modern amenities. Perfect for urban living",
         agent: {
-            name: "Ashiqur Rahman",
+            name: "Ahsan Alam",
             phone: "(123) 456-7890",
             email: "R9yQ2@example.com55",
-            image: "/uploads/agent.png"
+            image: "/images/agent2.png"
         }
     },
     {
@@ -146,10 +146,10 @@ const initialProperties = [
         city: "bavaro",
         description: "A beautiful apartment with stunning views and modern amenities. Perfect for urban living",
         agent: {
-            name: "Ashiqur Rahman",
+            name: "Ahsan Alam",
             phone: "(123) 456-7890",
             email: "R9yQ2@example.com55",
-            image: "/uploads/agent.png"
+            image: "/images/agent2.png"
         }
     },
 ];
