@@ -52,17 +52,14 @@ const adminMenu = [
 
     // Property Moderation
     { title: "Manage Properties", href: "/dashboard/admin/properties", icon: Building2 },
-    { title: "Categories / Property Types", href: "/dashboard/admin/categories", icon: FolderTree },
 
-    // Payment Reporting
-    { title: "Payment Analytics", href: "/dashboard/admin/payment-analytics", icon: DollarSign },
     { title: "All Transactions", href: "/dashboard/admin/transactions", icon: CreditCard },
 
     // CSV Export
     { title: "Export CSV", href: "/dashboard/admin/export", icon: FileSpreadsheet },
 
     // Reports
-    { title: "Reports & Logs", href: "/dashboard/admin/reports", icon: ClipboardList },
+    // { title: "Reports & Logs", href: "/dashboard/admin/reports", icon: ClipboardList },
 ];
 
 //
