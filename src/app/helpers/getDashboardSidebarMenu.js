@@ -69,7 +69,7 @@ const adminMenu = [
 //
 
 export function getDashboardSideMenu(role) {
-    if (role === "admin") return adminMenu;
+    if (role === "admin" || role == 'super_admin') return adminMenu;
     if (role === "owner") return ownerMenu;
     return []; // Public users have no dashboard
 }
