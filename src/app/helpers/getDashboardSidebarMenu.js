@@ -29,13 +29,13 @@ const ownerMenu = [
     // Property Management
     { title: "My Properties", href: "/dashboard/owner/properties", icon: Building2 },
     { title: "Add New Property", href: "/dashboard/owner/properties/add", icon: PlusCircle },
-    { title: "Featured Listings", href: "/dashboard/owner/featured", icon: Star },
+    // { title: "Featured Listings", href: "/dashboard/owner/featured", icon: Star },
 
     // Payments
     { title: "My Payments", href: "/dashboard/owner/payments", icon: CreditCard },
 
     // Profile
-    { title: "My Account", href: "/dashboard/profile", icon: Settings },
+    { title: "My Account", href: "/dashboard/owner/profile", icon: Settings },
 ];
 
 //
