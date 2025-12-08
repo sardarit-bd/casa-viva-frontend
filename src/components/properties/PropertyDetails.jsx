@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MapPin, BedDouble, Bath, Square, Phone, Mail } from "lucide-react";
+import { MapPin, BedDouble, Bath, Square, Phone, Mail, StepBack } from "lucide-react";
 
 export default function PropertyDetails({ property }) {
     if (!property) {
@@ -32,32 +32,37 @@ export default function PropertyDetails({ property }) {
         },
     } = property;
 
-    // 👉 MAIN IMAGE STATE
-    const [previewImage, setPreviewImage] = useState(image);
+    const gallery = [image, ...images];
 
-    // 👉 FINAL GALLERY LIST (ensures main + all images included)
-    const gallery = [image, ...images].slice(0, 4); // limit to 4 images (1 main + 3 gallery)
+    // Slider settings for bottom section
+    const [thumbIndex, setThumbIndex] = useState(0);
+    const thumbNext = () => setThumbIndex((prev) => Math.min(prev + 1, gallery.length - 4));
+    const thumbPrev = () => setThumbIndex((prev) => Math.max(prev - 1, 0));
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const nextSlide = () => {
+        setCurrentIndex((prev) => (prev + 1) % gallery.length);
+    };
+
+    const prevSlide = () => {
+        setCurrentIndex((prev) => (prev - 1 + gallery.length) % gallery.length);
+    };
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
 
-            {/* TOP SECTION */}
             <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-start">
 
-                {/* MAIN PREVIEW IMAGE */}
                 <div className="relative w-full h-[300px] sm:h-[400px] md:h-[480px] lg:h-[520px] rounded-2xl overflow-hidden shadow-md bg-gray-100">
                     <Image
-                        src={previewImage}
+                        src={gallery[currentIndex]}
                         alt={title}
                         fill
                         className="object-cover transition-all duration-300"
                     />
                 </div>
 
-                {/* PROPERTY INFO */}
                 <div className="flex flex-col space-y-6">
-
-                    {/* TITLE + PRICE */}
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold text-[#1F2328] leading-tight">
                             {title}
@@ -67,13 +72,11 @@ export default function PropertyDetails({ property }) {
                         </p>
                     </div>
 
-                    {/* ADDRESS */}
                     <div className="flex items-center gap-2 text-gray-600 text-base">
                         <MapPin size={20} />
                         <span>{address}</span>
                     </div>
 
-                    {/* KEY DETAILS */}
                     <div className="bg-white border rounded-xl p-5 md:p-6 shadow-sm">
                         <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">
                             Key Details
@@ -112,41 +115,61 @@ export default function PropertyDetails({ property }) {
                         </div>
                     </div>
 
-                    {/* IMAGE GALLERY (CLICKABLE) */}
-                    <div className="grid grid-cols-3 gap-5 mt-4">
-                        {gallery.slice(1).map((img, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setPreviewImage(img)}
-                                className="w-full h-28 border rounded-xl overflow-hidden flex items-center justify-center bg-white focus:outline-none hover:opacity-80 transition"
+                    <div className="relative mt-4 py-2 px-2 bg-white/40 backdrop-blur-sm rounded-xl border shadow-sm select-none">
+
+                        {/* Prev Button */}
+                        <button
+                            onClick={thumbPrev}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md border hover:bg-gray-100 transition hover:scale-110 z-20"
+                        >
+                            <StepBack className="w-4 h-4 text-gray-700" />
+                        </button>
+
+                        {/* Thumbnails Slider */}
+                        <div className="overflow-hidden">
+                            <div
+                                className="flex gap-4 transition-transform duration-300 ease-out"
+                                style={{ transform: `translateX(-${thumbIndex * 100}px)` }}
                             >
-                                {img ? (
-                                    <Image
-                                        src={img}
-                                        alt={`Gallery ${i + 1}`}
-                                        width={100}
-                                        height={100}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-xs text-gray-500">No Image</span>
-                                )}
-                            </button>
-                        ))}
+                                {gallery.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentIndex(i)}
+                                        className={`min-w-[95px] h-24 rounded-xl overflow-hidden border shadow-sm transition-all duration-200 
+                        ${currentIndex === i
+                                                ? "ring-2 ring-red-500 scale-105"
+                                                : "hover:scale-105 hover:shadow-md"
+                                            }`}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={`Thumb ${i}`}
+                                            width={100}
+                                            height={100}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Next Button */}
+                        <button
+                            onClick={thumbNext}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md border hover:bg-gray-100 transition hover:scale-110 z-20"
+                        >
+                            <StepBack className="w-4 h-4 text-gray-700 rotate-180" />
+                        </button>
                     </div>
 
                 </div>
             </div>
 
-            {/* DESCRIPTION */}
             <div className="bg-white border rounded-xl p-5 md:p-7 shadow-sm">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                    Description
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Description</h2>
                 <p className="text-gray-700 leading-relaxed">{description}</p>
             </div>
 
-            {/* MAP */}
             <div className="map">
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8976.524870225803!2d-68.41150214321561!3d18.495511638412378!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8ea890ba67c733c1%3A0x7a0111a8ec90305b!2sCap%20Cana%2C%2023000%20Punta%20Cana%2C%20Dominican%20Republic!5e1!3m2!1sen!2sbd!4v1764738996752!5m2!1sen!2sbd"
@@ -159,11 +182,8 @@ export default function PropertyDetails({ property }) {
                 ></iframe>
             </div>
 
-            {/* CONTACT AGENT */}
             <div className="bg-white border rounded-xl p-5 md:p-7 shadow-sm">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-5">
-                    Contact Agent
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-5">Contact Agent</h2>
 
                 <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
                     <Image

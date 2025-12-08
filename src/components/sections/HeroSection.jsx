@@ -160,7 +160,6 @@ export default function LuxuryHero() {
                     />
                 </div>
 
-
             </div>
 
             {/* CUSTOM STYLES */}
