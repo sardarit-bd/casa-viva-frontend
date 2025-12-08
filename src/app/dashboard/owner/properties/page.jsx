@@ -124,6 +124,7 @@ export default function PropertiesPage() {
       result = result.filter(property => property.city === selectedCity);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredProperties(result);
     setCurrentPage(1);
   }, [searchTerm, selectedType, selectedCity, properties]);
