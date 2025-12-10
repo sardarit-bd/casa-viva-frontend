@@ -52,6 +52,7 @@ export default function PropertyResults({ filtered }) {
                             className="block fade-up"
                         >
                             <PropertyCard
+                                id={item.id}
                                 image={item.image}
                                 title={item.title}
                                 price={item.price}

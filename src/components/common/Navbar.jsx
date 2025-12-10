@@ -79,7 +79,7 @@ export default function Navbar() {
             <UserButtons />
 
             <Link
-              href="/add-property"
+              href="/dashboard/owner/properties/add"
               className="px-5 py-2 border border-[#1F3A34] rounded-full text-sm font-medium hover:bg-[#1F3A34] hover:text-white transition"
             >
               Add Property
@@ -145,7 +145,7 @@ export default function Navbar() {
             </div>
 
             <Link
-              href="/add-property"
+              href="/dashboard/owner/properties/add"
               className="block w-full text-center px-5 py-2 border border-[#1F3A34] rounded-full text-sm font-medium hover:bg-[#1F3A34] hover:text-white transition"
             >
               Add Property

@@ -16,6 +16,7 @@ export default function PropertyCard({
     isFeatured,
     isForSale,
 }) {
+
     const [isFavourite, setIsFavourite] = useState(false);
 
     // Load favourite status from localStorage on component mount
