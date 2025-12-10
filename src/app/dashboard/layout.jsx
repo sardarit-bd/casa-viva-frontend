@@ -19,7 +19,7 @@ export default function DashboardLayout({
   }
 
   if(!user){
-    router.push('/')
+    router.push('/pages/login')
   }
   return (
     <div className="flex min-h-screen flex-col space-y-6">
