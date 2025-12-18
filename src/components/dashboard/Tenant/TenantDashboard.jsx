@@ -217,21 +217,6 @@ export default function TenantDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Tenant Dashboard</h1>
               <p className="text-gray-600">Manage your rentals, payments, and requests</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-500 hover:text-gray-700 relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-              </button>
-              <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-[#1F3A34] rounded-full flex items-center justify-center text-white">
-                  <User className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Alex Johnson</p>
-                  <p className="text-xs text-gray-500">Tenant</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -448,36 +433,6 @@ export default function TenantDashboard() {
                       }`}>
                         {request.priority} Priority
                       </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h2>
-              
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className={`mt-1 p-2 rounded-lg ${
-                      activity.id === 1 ? 'bg-green-100' :
-                      activity.id === 2 ? 'bg-blue-100' :
-                      activity.id === 3 ? 'bg-orange-100' : 'bg-purple-100'
-                    }`}>
-                      <div className={`
-                        ${activity.id === 1 ? 'text-green-600' :
-                        activity.id === 2 ? 'text-blue-600' :
-                        activity.id === 3 ? 'text-orange-600' : 'text-purple-600'}
-                      `}>
-                        {activity.icon}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-500">{activity.property}</p>
-                      <p className="text-xs text-gray-400 mt-1">{activity.date}</p>
                     </div>
                   </div>
                 ))}
