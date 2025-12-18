@@ -35,36 +35,34 @@ export default function Register() {
     setForm({ ...form, role: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-    
-    try {
-      await register(form);
-      setMessage("Registration successful! You can now log in.");
-      setForm({ 
-        name: "", 
-        email: "", 
-        password: "", 
-        role: RegistrationRoles[0].value 
-      });
-      
-      if (form.role === RegistrationRoles[1].value) {
-        router.push("/owner/dashboard");
-      } else {
-        router.push("/pages/login");
-      }
-      
-    } catch (err) {
-      console.log(err);
-      setMessage(
-        err.response?.data?.message || "Registration failed. Try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
+
+  try {
+    await register(form);
+
+    setMessage("Registration successful! You can now log in.");
+
+    setForm({
+      name: "",
+      email: "",
+      password: "",
+      role: RegistrationRoles[0].value
+    });
+
+    router.replace("/pages/login");
+
+  } catch (err) {
+    setMessage(
+      err.response?.data?.message || "Registration failed. Try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
