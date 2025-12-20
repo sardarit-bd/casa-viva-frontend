@@ -1,4 +1,3 @@
-// app/pages/favourites/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";

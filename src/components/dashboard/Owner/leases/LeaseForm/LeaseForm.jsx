@@ -1,0 +1,237 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Save,
+  Edit,
+  Eye,
+  Download,
+  Send,
+  FileText,
+  User,
+  DollarSign
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import LeasePreview from './LeasePreview';
+import SignatureView from './SignatureView';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FormContent } from './FormContent';
+
+// Validation schema
+const leaseSchema = z.object({
+  propertyAddress: z.string().min(1, 'Property address is required'),
+  landlordName: z.string().min(1, 'Landlord name is required'),
+  tenantName: z.string().min(1, 'Tenant name is required'),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
+  monthlyRent: z.string().min(1, 'Monthly rent is required'),
+  paymentDay: z.string().min(1, 'Payment day is required'),
+  securityDeposit: z.string().min(1, 'Security deposit is required'),
+  paymentMethod: z.string().min(1, 'Payment method is required'),
+  utilitiesIncluded: z.array(z.string()).optional(),
+  utilitiesTenantPaid: z.array(z.string()).optional(),
+  occupants: z.string().optional(),
+  noticeDays: z.string().min(1, 'Notice period is required'),
+  additionalTerms: z.string().optional(),
+  leaseType: z.enum(['fixed_term', 'month_to_month']),
+});
+
+export default function LeaseForm({
+  propertyData,
+  tenantData,
+  landlordData,
+  mode = 'create',
+  initialData = null
+}) {
+  const [loading, setLoading] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [signatureMode, setSignatureMode] = useState(false);
+  const [leaseSigned, setLeaseSigned] = useState(false);
+
+  const defaultValues = initialData || {
+    propertyAddress: propertyData?.address || '',
+    landlordName: landlordData?.name || '',
+    tenantName: tenantData?.name || '',
+    startDate: '',
+    endDate: '',
+    monthlyRent: propertyData?.rent || '',
+    paymentDay: '1',
+    securityDeposit: '',
+    paymentMethod: 'bank_transfer',
+    utilitiesIncluded: ['water', 'electricity'],
+    utilitiesTenantPaid: ['internet', 'cable'],
+    occupants: '',
+    noticeDays: '30',
+    additionalTerms: '',
+    leaseType: 'fixed_term',
+  };
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(leaseSchema),
+    defaultValues,
+  });
+
+  const selectedUtilities = watch('utilitiesIncluded') || [];
+  const tenantUtilities = watch('utilitiesTenantPaid') || [];
+  const formData = watch();
+
+  const utilityOptions = [
+    { id: 'water', label: 'Water' },
+    { id: 'electricity', label: 'Electricity' },
+    { id: 'gas', label: 'Gas' },
+    { id: 'internet', label: 'Internet' },
+    { id: 'cable', label: 'Cable TV' },
+    { id: 'trash', label: 'Trash Collection' },
+    { id: 'maintenance', label: 'Maintenance Fee' },
+  ];
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (mode === 'create') {
+        toast.success('Lease draft created successfully!');
+      } else {
+        toast.success('Lease updated successfully!');
+      }
+
+      if (signatureMode) {
+        toast.success('Lease sent to tenant for signature!');
+        setSignatureMode(false);
+      }
+    } catch (error) {
+      toast.error('Error saving lease');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generatePDF = async () => {
+    setLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success('PDF generated successfully!');
+
+      const blob = new Blob(['Simulated PDF content'], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Lease-Agreement-${new Date().getTime()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error('Error generating PDF');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendForSignature = async () => {
+    setSignatureMode(true);
+    // toast.success('Lease sent for signature! Tenant can now sign the agreement.');
+  };
+
+  const handleSignLease = async () => {
+    setLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setLeaseSigned(true);
+      toast.success('Lease agreement signed successfully! The document is now legally binding.');
+      setSignatureMode(false);
+    } catch (error) {
+      toast.error('Error signing lease');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#1F3A34] mb-2">
+          {mode === 'create' ? 'Create New Lease' : 'Edit Lease Agreement'}
+        </h1>
+        <p className="text-gray-600">
+          Fill in lease details, customize terms, and send for e-signature
+        </p>
+      </div>
+
+      {/* Mode Toggles */}
+      <div className="flex gap-4 mb-8">
+        <button
+          onClick={() => {
+            setPreviewMode(false);
+            setSignatureMode(false);
+          }}
+          className={`px-4 py-2 rounded-lg ${!previewMode && !signatureMode ? 'bg-[#1F3A34] text-white' : 'bg-gray-100'}`}
+        >
+          <Edit className="inline-block mr-2 h-4 w-4" />
+          Edit
+        </button>
+        <button
+          onClick={() => setPreviewMode(true)}
+          className={`px-4 py-2 rounded-lg ${previewMode ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+        >
+          <Eye className="inline-block mr-2 h-4 w-4" />
+          Preview
+        </button>
+
+        {!leaseSigned && (
+          <button
+            onClick={sendForSignature}
+            className={`px-4 py-2 rounded-lg ${signatureMode ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+          >
+            <Send className="inline-block mr-2 h-4 w-4" />
+            {signatureMode ? 'In Signature Mode' : 'Send for Signature'}
+          </button>
+        )}
+        <button
+          onClick={generatePDF}
+          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+          disabled={loading}
+        >
+          <Download className="inline-block mr-2 h-4 w-4" />
+          Download PDF
+        </button>
+      </div>
+
+      {previewMode ? (
+        <LeasePreview data={formData} />
+      ) : signatureMode ? (
+        <SignatureView
+          data={formData}
+          onSign={handleSignLease}
+          loading={loading}
+        />
+      ) : (
+        <FormContent
+          register={register}
+          handleSubmit={handleSubmit}
+          errors={errors}
+          onSubmit={onSubmit}
+          loading={loading}
+          selectedUtilities={selectedUtilities}
+          tenantUtilities={tenantUtilities}
+          setValue={setValue}
+          utilityOptions={utilityOptions}
+          signatureMode={signatureMode}
+          setPreviewMode={setPreviewMode}
+          watch={watch}
+        />
+      )}
+    </div>
+  );
+}

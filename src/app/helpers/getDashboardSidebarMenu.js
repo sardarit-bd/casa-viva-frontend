@@ -1,22 +1,19 @@
 import {
-    Home,
-    Users,
-    UserCog,
-    Building2,
-    Star,
-    CreditCard,
-    BarChart3,
-    FileSpreadsheet,
-    ClipboardList,
-    LineChart,
-    FolderTree,
-    DollarSign,
-    PlusCircle,
-    Edit,
-    Trash2,
-    Settings,
-    SettingsIcon,
-    Pen,
+  Home,
+  Users,
+  Building2,
+  CreditCard,
+  FileSpreadsheet,
+  PlusCircle,
+  Settings,
+  SettingsIcon,
+  Pen,
+  FileText,
+  Wrench,
+  MessageSquare,
+  User,
+  Bell,
+  HeartPlus,
 } from "lucide-react";
 
 //
@@ -26,18 +23,18 @@ import {
 //
 
 const ownerMenu = [
-    { title: "Dashboard", href: "/dashboard", icon: Home },
+  { title: "Dashboard", href: "/dashboard", icon: Home },
 
-    // Property Management
-    { title: "My Properties", href: "/dashboard/owner/properties", icon: Building2 },
-    { title: "Add New Property", href: "/dashboard/owner/properties/add", icon: PlusCircle },
-    // { title: "Featured Listings", href: "/dashboard/owner/featured", icon: Star },
+  // Property Management
+  { title: "My Properties", href: "/dashboard/owner/properties", icon: Building2 },
+  { title: "Leases", href: "/dashboard/owner/leases", icon: FileText },
+  { title: "Add New Property", href: "/dashboard/owner/properties/add", icon: PlusCircle },
 
-    // Payments
-    { title: "My Payments", href: "/dashboard/owner/payments", icon: CreditCard },
+  // Payments
+  { title: "My Payments", href: "/dashboard/owner/payments", icon: CreditCard },
 
-    // Profile
-    { title: "My Account", href: "/dashboard/owner/profile", icon: Settings },
+  // Profile
+  { title: "My Account", href: "/dashboard/owner/profile", icon: Settings },
 ];
 
 //
@@ -47,23 +44,38 @@ const ownerMenu = [
 //
 
 const adminMenu = [
-    { title: "Dashboard", href: "/dashboard", icon: Home },
+  { title: "Dashboard", href: "/dashboard", icon: Home },
 
-    // User Management
-    { title: "Manage Users", href: "/dashboard/admin/users", icon: Users },
+  // User Management
+  { title: "Manage Users", href: "/dashboard/admin/users", icon: Users },
 
-    // Property Moderation
-    { title: "Manage Properties", href: "/dashboard/admin/properties", icon: Building2 },
-    {title: "Blogs", href: "/dashboard/admin/blog", icon: Pen},
+  // Property Moderation
+  { title: "Manage Properties", href: "/dashboard/admin/properties", icon: Building2 },
+  { title: "Blogs", href: "/dashboard/admin/blog", icon: Pen },
 
-    { title: "All Transactions", href: "/dashboard/admin/transactions", icon: CreditCard },
+  // Finance
+  { title: "All Transactions", href: "/dashboard/admin/transactions", icon: CreditCard },
 
-    // CSV Export
-    { title: "Export CSV", href: "/dashboard/admin/export", icon: FileSpreadsheet },
-    {title: "Settings", href: "/dashboard/admin/setting", icon: SettingsIcon}
+  // Tools
+  { title: "Export CSV", href: "/dashboard/admin/export", icon: FileSpreadsheet },
+  { title: "Settings", href: "/dashboard/admin/setting", icon: SettingsIcon },
+];
 
-    // Reports
-    // { title: "Reports & Logs", href: "/dashboard/admin/reports", icon: ClipboardList },
+//
+// ================================
+// TENANT MENU
+// ================================
+//
+
+const tenantMenu = [
+  { title: "Dashboard", href: "/dashboard", icon: Home },
+
+  { title: "My Properties", href: "/dashboard/tenant/properties", icon: Building2 },
+  { title: "Leases", href: "/dashboard/tenant/leases", icon: FileText },
+  { title: "Payments", href: "/dashboard/tenant/payments", icon: CreditCard },
+  { title: "Maintenance", href: "/dashboard/tenant/maintenance", icon: Wrench },
+  { title: "Favourites", href: "/dashboard/tenant/favourites", icon: HeartPlus },
+  { title: "Profile", href: "/dashboard/tenant/profile", icon: User }
 ];
 
 //
@@ -73,7 +85,9 @@ const adminMenu = [
 //
 
 export function getDashboardSideMenu(role) {
-    if (role === "admin" || role == 'super_admin') return adminMenu;
-    if (role === "owner") return ownerMenu;
-    return []; // Public users have no dashboard
+  if (role === "admin" || role === "super_admin") return adminMenu;
+  if (role === "owner") return ownerMenu;
+  if (role === "tenant") return tenantMenu;
+
+  return [];
 }
