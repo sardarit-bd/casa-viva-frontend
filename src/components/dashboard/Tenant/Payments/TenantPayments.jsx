@@ -18,6 +18,7 @@ import {
   Bell
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function TenantPayments() {
   const [loading, setLoading] = useState(false);
@@ -144,14 +145,14 @@ export default function TenantPayments() {
     try {
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // Update transaction status
-      const updatedTransactions = transactions.map(t => 
+      const updatedTransactions = transactions.map(t =>
         t.id === transaction.id ? { ...t, status: 'paid', date: new Date().toISOString().split('T')[0] } : t
       );
-      
+
       setTransactions(updatedTransactions);
-      
+
       // Update stats
       setStats(prev => ({
         ...prev,
@@ -160,7 +161,7 @@ export default function TenantPayments() {
         upcomingPayments: prev.upcomingPayments - transaction.amount,
         paymentHistory: [...prev.paymentHistory, { ...transaction, status: 'paid', date: new Date().toISOString().split('T')[0] }]
       }));
-      
+
       toast.success(`Payment of $${transaction.amount} completed successfully!`);
       setSelectedPayment(null);
     } catch (error) {
@@ -189,7 +190,7 @@ export default function TenantPayments() {
       
       Thank you for your payment!
     `;
-    
+
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -199,7 +200,7 @@ export default function TenantPayments() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast.success('Receipt downloaded successfully!');
   };
 
@@ -318,17 +319,21 @@ export default function TenantPayments() {
                 />
               </div>
               <div className="flex gap-2">
-                <select
-                  className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                <Select
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onValueChange={(value) => setFilter(value)}
                 >
-                  <option value="all">All Payments</option>
-                  <option value="paid">Paid</option>
-                  <option value="pending">Pending</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="overdue">Overdue</option>
-                </select>
+                  <SelectTrigger className="w-[180px] rounded-lg">
+                    <SelectValue placeholder="Filter requests" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="all">All Requests</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
                 <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
@@ -342,7 +347,7 @@ export default function TenantPayments() {
             <div className="p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">Recent Transactions</h2>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -524,8 +529,8 @@ export default function TenantPayments() {
                     <div key={month} className="flex items-center">
                       <span className="w-12 text-sm text-gray-600">{month}</span>
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 rounded-full h-2" 
+                        <div
+                          className="bg-green-500 rounded-full h-2"
                           style={{ width: `${100 - (index * 20)}%` }}
                         ></div>
                       </div>

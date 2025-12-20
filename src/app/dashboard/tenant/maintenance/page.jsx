@@ -1,5 +1,5 @@
-// import MaintenanceRequests from "@/components/dashboard/Tenant/Maintenance/MaintenanceRequests";
+import MaintenanceRequests from "@/components/dashboard/Tenant/MaintenanceRequests/MaintenanceRequests";
 
-// export default function MaintenancePage() {
-//   return <MaintenanceRequests />;
-// }
+export default function MaintenancePage() {
+  return <MaintenanceRequests />;
+}

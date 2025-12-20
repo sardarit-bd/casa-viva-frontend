@@ -150,28 +150,28 @@ export default function TenantDashboard() {
       title: 'Pay Rent', 
       icon: <CreditCard className="h-5 w-5" />, 
       href: '/tenant/payments/pay', 
-      color: 'bg-green-600 hover:bg-green-700',
+      color: 'bg-[#004087] hover:bg-[#0250a8]',
       description: 'Make a payment'
     },
     { 
       title: 'Request Maintenance', 
       icon: <PlusCircle className="h-5 w-5" />, 
       href: '/tenant/maintenance/new', 
-      color: 'bg-blue-600 hover:bg-blue-700',
+      color: 'bg-[#004087] hover:bg-[#0250a8]',
       description: 'Submit a request'
     },
     { 
       title: 'View Documents', 
       icon: <FileText className="h-5 w-5" />, 
       href: '/tenant/documents', 
-      color: 'bg-purple-600 hover:bg-purple-700',
+      color: 'bg-[#004087] hover:bg-[#0250a8]',
       description: 'Lease & agreements'
     },
     { 
       title: 'Contact Landlord', 
       icon: <MessageSquare className="h-5 w-5" />, 
       href: '/tenant/messages', 
-      color: 'bg-indigo-600 hover:bg-indigo-700',
+      color: 'bg-[#004087] hover:bg-[#0250a8]',
       description: 'Send message'
     },
   ];
@@ -223,7 +223,7 @@ export default function TenantDashboard() {
 
       <div className="p-6">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-[#1F3A34] to-[#2a4d45] rounded-xl p-6 text-white mb-8">
+        <div className="bg-gradient-to-r from-[#004087] to-[#004087] rounded-xl p-6 text-white mb-8">
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-bold mb-2">Welcome back, Alex!</h2>
@@ -328,10 +328,10 @@ export default function TenantDashboard() {
                     </div>
                     
                     <div className="flex space-x-3 mt-5">
-                      <Link href={`/tenant/properties/${property.id}`} className="flex-1 text-center py-2 border border-[#1F3A34] text-[#1F3A34] rounded-lg hover:bg-[#1F3A34] hover:text-white transition-colors">
+                      <Link href={`/tenant/properties/${property.id}`} className="flex-1 text-center py-2 border border-[#004087] text-[#004087] rounded-lg hover:bg-[#004087] hover:text-white transition-colors">
                         View Details
                       </Link>
-                      <Link href={`/tenant/payments/pay?property=${property.id}`} className="flex-1 text-center py-2 bg-[#1F3A34] text-white rounded-lg hover:bg-[#2a4d45] transition-colors">
+                      <Link href={`/tenant/payments/pay?property=${property.id}`} className="flex-1 text-center py-2 bg-[#004087] text-white rounded-lg hover:bg-[#0250a8] transition-colors">
                         Pay Rent
                       </Link>
                     </div>
@@ -344,7 +344,7 @@ export default function TenantDashboard() {
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Upcoming Payments</h2>
-                <Link href="/tenant/payments" className="text-[#1F3A34] hover:text-[#2a4d45] font-medium">
+                <Link href="/tenant/payments" className="text-[#004087] hover:text-[#0250a8] font-medium">
                   View All →
                 </Link>
               </div>
@@ -383,7 +383,7 @@ export default function TenantDashboard() {
                       }`}>
                         {payment.status}
                       </span>
-                      <button className="px-4 py-2 bg-[#1F3A34] text-white rounded-lg hover:bg-[#2a4d45] text-sm">
+                      <button className="px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#0250a8] text-sm">
                         Pay Now
                       </button>
                     </div>

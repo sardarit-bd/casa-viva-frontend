@@ -120,7 +120,7 @@ export default function TenantProfile() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
@@ -139,7 +139,7 @@ export default function TenantProfile() {
                     alt={user.name}
                     className="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-lg"
                   />
-                  <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                  <button className="absolute bottom-0 right-0 p-2 bg-[#004087] text-white rounded-full hover:bg-[#0250a8]">
                     <Camera className="h-4 w-4" />
                   </button>
                 </div>
@@ -216,7 +216,7 @@ export default function TenantProfile() {
                   {activeTab === 'personal' && (
                     <button
                       onClick={() => setEditMode(!editMode)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                      className="px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#0250a8] flex items-center"
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       {editMode ? 'Cancel Edit' : 'Edit Profile'}

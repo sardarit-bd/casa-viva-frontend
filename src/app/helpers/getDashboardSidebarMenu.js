@@ -73,8 +73,8 @@ const tenantMenu = [
   { title: "My Properties", href: "/dashboard/tenant/properties", icon: Building2 },
   { title: "Leases", href: "/dashboard/tenant/leases", icon: FileText },
   { title: "Payments", href: "/dashboard/tenant/payments", icon: CreditCard },
-  // { title: "Maintenance", href: "/dashboard/tenant/maintenance", icon: Wrench },
-  // { title: "Favorites", href: "/dashboard/tenant/favorite", icon: HeartPlus },
+  { title: "Maintenance", href: "/dashboard/tenant/maintenance", icon: Wrench },
+  { title: "Favourites", href: "/dashboard/tenant/favourites", icon: HeartPlus },
   { title: "Profile", href: "/dashboard/tenant/profile", icon: User }
 ];
 

@@ -29,7 +29,7 @@ export default function CreateLeasePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
-  
+
   const prefill = searchParams.get('prefill') === 'true';
 
   useEffect(() => {
@@ -76,6 +76,7 @@ export default function CreateLeasePage() {
         mode="create"
         onSuccess={handleSuccess}
       />
+
     </div>
   );
 }
