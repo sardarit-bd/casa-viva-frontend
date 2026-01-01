@@ -33,7 +33,6 @@ export default function TenantProfile() {
 
   useEffect(() => {
     if (authUser) {
-      // Transform backend user data to frontend format
       const transformedUser = {
         id: authUser._id,
         name: authUser.name,
@@ -46,11 +45,10 @@ export default function TenantProfile() {
         location: {
           address: authUser.profile?.address?.street || '',
           city: authUser.profile?.address?.city || '',
-          state: '', // Add if you have state in backend
-          zip: '',   // Add if you have zip in backend
+          state: '',
+          zip: '',
           country: authUser.profile?.address?.country || '',
         },
-        // Sample data (you should fetch these from backend)
         emergencyContact: {
           name: 'Jane Doe',
           phone: '+1 (555) 987-6543',
@@ -80,14 +78,29 @@ export default function TenantProfile() {
 
   const handleSaveProfile = async (formData) => {
     setLoading(true);
+
     try {
-      // Format data according to backend schema
+      let avatarUrl = user.avatar;
+
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("image", imageFile);
+
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload/image`,
+          fd,
+          { withCredentials: true }
+        );
+
+        avatarUrl = res.data.data.url;
+      }
+
       const payload = {
         name: formData.name,
         profile: {
           phone: formData.phone,
           company: formData.company || '',
-          avatar: imagePreview,
+          avatar: avatarUrl,
           address: {
             street: formData.location?.address || '',
             city: formData.location?.city || '',
@@ -98,20 +111,15 @@ export default function TenantProfile() {
 
       await updateProfile(payload);
 
-      // Update local state
-      setUser(prev => ({
-        ...prev,
-        ...formData
-      }));
-
       setEditMode(false);
+      setImageFile(null);
     } catch (error) {
-      console.error("Profile update error:", error);
       toast.error("Profile update failed");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleAvatarUpload = async (file) => {
     const formData = new FormData();
@@ -191,17 +199,23 @@ export default function TenantProfile() {
                       accept="image/*"
                       className="hidden"
                       id="avatar-upload"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files[0];
                         if (!file) return;
 
-                        try {
-                          const imageUrl = await handleAvatarUpload(file);
-                          setImagePreview(imageUrl);
-                        } catch {
-                          toast.error("Image upload failed");
+                        if (!file.type.startsWith("image/")) {
+                          toast.error("Only image files allowed");
+                          return;
                         }
+
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error("Max 5MB allowed");
+                          return;
+                        }
+                        setImageFile(file);
+                        setImagePreview(URL.createObjectURL(file));
                       }}
+
                     />
 
 

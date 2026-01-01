@@ -73,10 +73,14 @@ export default function OwnerProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setErrors({});
-    setSuccessMessage('');
 
     try {
+      let avatarUrl = formData.profileImage;
+
+      if (imageFile) {
+        avatarUrl = await uploadOwnerAvatar(imageFile);
+      }
+
       const payload = {
         name: formData.name,
         profile: {
@@ -84,7 +88,7 @@ export default function OwnerProfilePage() {
           bio: formData.bio,
           company: formData.company,
           website: formData.website,
-          avatar: formData.profileImage,
+          avatar: avatarUrl,
           address: {
             street: formData.address,
             city: formData.city,
@@ -94,42 +98,30 @@ export default function OwnerProfilePage() {
       };
 
       const res = await api.patch('/auth/users/me', payload);
+
       const u = res.data.data;
 
-      const updatedUser = {
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        joinDate: u.createdAt,
-
-        phone: u.profile?.phone || '',
-        bio: u.profile?.bio || '',
-        company: u.profile?.company || '',
-        website: u.profile?.website || '',
-        profileImage: u.profile?.avatar || '/avatar-placeholder.png',
-
-        address: u.profile?.address?.street || '',
-        city: u.profile?.address?.city || '',
-        country: u.profile?.address?.country || '',
-      };
-
-      setUserData(updatedUser);
-      setFormData(updatedUser);
-      setImagePreview(updatedUser.profileImage);
-
-      setIsEditing(false);
-      setSuccessMessage('Profile updated successfully!');
-    } catch (err) {
-      setErrors({
-        submit:
-          err.response?.data?.message ||
-          'Profile update failed. Please try again.',
+      setUserData({
+        ...userData,
+        profileImage: u.profile.avatar,
       });
+
+      setFormData({
+        ...formData,
+        profileImage: u.profile.avatar,
+      });
+
+      setImagePreview(u.profile.avatar);
+      setImageFile(null);
+      setIsEditing(false);
+
+    } catch (err) {
+      console.error(err);
     } finally {
       setSaving(false);
-      setTimeout(() => setSuccessMessage(''), 3000);
     }
   };
+
 
   const uploadOwnerAvatar = async (file) => {
     const formData = new FormData();
@@ -205,7 +197,7 @@ export default function OwnerProfilePage() {
                 </div>
               </div>
 
-              {!isEditing && <DangerZone />}
+              {/* {!isEditing && <DangerZone />} */}
             </div>
           </div>
         </form>

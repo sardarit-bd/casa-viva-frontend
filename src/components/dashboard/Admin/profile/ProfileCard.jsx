@@ -70,26 +70,23 @@ export default function ProfileCard({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  id="owner-avatar-upload"
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const file = e.target.files[0];
                     if (!file) return;
 
-                    try {
-                      const imageUrl = await uploadOwnerAvatar(file);
-
-                      setImagePreview(imageUrl);
-                      setFormData(prev => ({
-                        ...prev,
-                        profileImage: imageUrl,
-                      }));
-
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Avatar upload failed");
+                    if (!file.type.startsWith("image/")) {
+                      alert("Only image files allowed");
+                      return;
                     }
+                    if (file.size > 5 * 1024 * 1024) {
+                      alert("Max 5MB allowed");
+                      return;
+                    }
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
                   }}
                 />
+
 
               </label>
 
