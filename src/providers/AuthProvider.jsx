@@ -76,11 +76,22 @@ export function AuthProvider({ children }) {
     const updateProfile = async (payload) => {
         try {
             const res = await axios.patch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/users/me`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/update-profile`,
                 payload,
                 { withCredentials: true }
             );
-            setUser(res.data.data);
+            return res.data.data;
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    const getProfile = async () => {
+        try {
+            const res = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/profile`,
+                { withCredentials: true }
+            );
             return res.data.data;
         } catch (err) {
             throw err;
@@ -102,7 +113,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, register, updateProfile, sendResetPassword, resetPassword }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, register, updateProfile, sendResetPassword, resetPassword, getProfile }}>
             {children}
         </AuthContext.Provider>
     );
