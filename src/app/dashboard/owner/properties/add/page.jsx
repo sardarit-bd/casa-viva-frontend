@@ -184,7 +184,7 @@ export default function AddEditPropertyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Success Toast */}
       {success && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in">
@@ -200,7 +200,7 @@ export default function AddEditPropertyPage() {
       )}
 
       {/* Error Summary */}
-      {Object.keys(errors).length > 0 && (
+      {/* {Object.keys(errors).length > 0 && (
         <div className="fixed top-20 right-4 z-50 animate-slide-in max-w-md">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
             <div className="flex items-center mb-2">
@@ -217,7 +217,7 @@ export default function AddEditPropertyPage() {
             </ul>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
@@ -286,7 +286,7 @@ export default function AddEditPropertyPage() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="py-6">
         <PropertyForm
           isEditMode={isEditMode}
           initialData={propertyData}

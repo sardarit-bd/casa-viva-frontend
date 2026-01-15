@@ -215,9 +215,6 @@ export default function PropertyForm({
         isCover: img.isCover
       }))
     };
-
-    console.log('Submitting form data:', finalData);
-    console.log('With images:', images);  
     onSubmit(finalData);
   };
 
@@ -717,7 +714,7 @@ export default function PropertyForm({
           </div>
 
           {/* Featured Listing */}
-          <div className="bg-white rounded-xl shadow-sm border p-6">
+          {/* <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-semibold text-gray-900">Featured Listing</h3>
@@ -756,7 +753,7 @@ export default function PropertyForm({
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Preview Card */}
           <div className="bg-white rounded-xl shadow-sm border p-6">

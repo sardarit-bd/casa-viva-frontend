@@ -132,6 +132,26 @@ export default function PropertiesPage() {
     }
   };
 
+  const handleToggleFeatured = async (id) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/create-checkout`,
+        { propertyId: id },
+        {
+          withCredentials: true
+        }
+      );
+
+      console.log('Received response for featured status toggle:', res?.data?.data);
+      if(res?.data?.data?.url){
+        window.location.href = res.data.data.url;
+      }
+    } catch (error) {
+      console.error('Failed to toggle featured status', error);
+      alert('Failed to update featured status');
+      return;
+    }
+  }
   if (loading) {
     return (
       <div className="min-h-screen p-6">
@@ -406,13 +426,13 @@ export default function PropertiesPage() {
                           {property.bathrooms} baths
                         </span>
                       </div>
-                       <Link
-                            href={`/dashboard/owner/properties/edit/${property._id}`}
-                            className="flex items-center justify-center px-4 py-2.5 bg-[#1F3A34] text-white rounded-lg text-sm font-medium hover:bg-[#2a4d45] hover:shadow-sm transition-all duration-200"
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Property
-                          </Link>
+                      <Link
+                        href={`/dashboard/owner/properties/edit/${property._id}`}
+                        className="flex items-center justify-center px-4 py-2.5 bg-[#004797] text-white rounded-lg text-sm font-medium hover:bg-[#2a4d45] hover:shadow-sm transition-all duration-200"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Property
+                      </Link>
                     </div>
                     <>
                       {/* here add three button, make lease, make featured , and edit */}
@@ -422,8 +442,8 @@ export default function PropertiesPage() {
                           <button
                             onClick={() => route.push(`/dashboard/owner/leases/create?id=${property._id}`)}
                             className={`flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${property.isLeased
-                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-50 text-blue-700 hover:bg-blue-100 hover:shadow-sm'
+                              ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-50 text-blue-700 hover:bg-blue-100 hover:shadow-sm'
                               }`}
                             disabled={property.isLeased}
                           >
@@ -434,17 +454,18 @@ export default function PropertiesPage() {
                           {/* Make Featured Button */}
                           <button
                             onClick={() => handleToggleFeatured(property._id)}
+                            disabled={property.featured}
                             className={`flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${property.featured
-                                ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'
+                              ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'
                               }`}
                           >
                             <Star className={`h-4 w-4 mr-2 ${property.featured ? 'fill-yellow-500' : ''}`} />
-                            {property.featured ? 'Remove Featured' : 'Make Featured'}
+                            {property.featured ? 'Featured' : 'MakeFeatured'}
                           </button>
 
                           {/* Edit Button - Full width variant */}
-                         
+
                         </div>
                       </div>
                     </>
