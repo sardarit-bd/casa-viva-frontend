@@ -34,6 +34,7 @@ export default function PropertiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const itemsPerPage = 8;
+  
 
   const route = useRouter();
   useEffect(() => {
@@ -100,7 +101,6 @@ export default function PropertiesPage() {
     label: city === 'all' ? 'All Cities' : city
   }));
 
-  // Summary statistics
   const stats = {
     total: properties.length,
     active: properties.filter(p => p.status === 'active').length,
