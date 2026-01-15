@@ -9,14 +9,9 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
     name: '',
     email: '',
     phone: '',
-    // company: '',
-    location: {
-      address: '',
-      city: '',
-      // state: '',
-      // zip: '',
-      country: '',
-    }
+    address: '',
+    city: '',
+    country: '',
   });
 
   // Initialize form data when user changes
@@ -26,14 +21,9 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        // company: user.company || '',
-        location: {
-          address: user.location?.address || '',
-          city: user.location?.city || '',
-          // state: user.location?.state || '',
-          // zip: user.location?.zip || '',
-          country: user.location?.country || '',
-        }
+        address: user?.address || '',
+        city: user?.city || '',
+        country: user?.country || '',
       });
     }
   }, [user]);
@@ -45,32 +35,16 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle nested location fields
-    if (name.startsWith('location.')) {
-      const field = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        location: {
-          ...prev.location,
-          [field]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleLocationChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
-      location: {
-        ...prev.location,
-        [field]: value
-      }
+      [field]: value
     }));
   };
 
@@ -91,33 +65,137 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
     { value: 'Bangladesh', label: 'Bangladesh' }
   ];
 
-  // City options
-  const cityOptions = [
-    { value: '', label: 'Select City' },
-    { value: 'New York', label: 'New York' },
-    { value: 'Los Angeles', label: 'Los Angeles' },
-    { value: 'Chicago', label: 'Chicago' },
-    { value: 'Houston', label: 'Houston' },
-    { value: 'Phoenix', label: 'Phoenix' },
-    { value: 'Philadelphia', label: 'Philadelphia' },
-    { value: 'San Antonio', label: 'San Antonio' },
-    { value: 'San Diego', label: 'San Diego' },
-    { value: 'Dallas', label: 'Dallas' },
-    { value: 'San Jose', label: 'San Jose' },
-    { value: 'Punta Cana', label: 'Punta Cana' },
-    { value: 'Dhaka', label: 'Dhaka' },
-    { value: 'Chittagong', label: 'Chittagong' },
-    { value: 'London', label: 'London' },
-    { value: 'Toronto', label: 'Toronto' },
-    { value: 'Sydney', label: 'Sydney' },
-    { value: 'Berlin', label: 'Berlin' },
-    { value: 'Paris', label: 'Paris' },
-    { value: 'Madrid', label: 'Madrid' },
-    { value: 'Rome', label: 'Rome' },
-    { value: 'Tokyo', label: 'Tokyo' },
-    { value: 'Beijing', label: 'Beijing' },
-    { value: 'Mumbai', label: 'Mumbai' }
-  ];
+  // City options based on selected country
+  const getCityOptions = () => {
+    const citiesByCountry = {
+      '': [{ value: '', label: 'Select City' }],
+      'United States': [
+        { value: '', label: 'Select City' },
+        { value: 'New York', label: 'New York' },
+        { value: 'Los Angeles', label: 'Los Angeles' },
+        { value: 'Chicago', label: 'Chicago' },
+        { value: 'Houston', label: 'Houston' },
+        { value: 'Phoenix', label: 'Phoenix' },
+        { value: 'Philadelphia', label: 'Philadelphia' },
+        { value: 'San Antonio', label: 'San Antonio' },
+        { value: 'San Diego', label: 'San Diego' },
+        { value: 'Dallas', label: 'Dallas' },
+        { value: 'San Jose', label: 'San Jose' }
+      ],
+      'Canada': [
+        { value: '', label: 'Select City' },
+        { value: 'Toronto', label: 'Toronto' },
+        { value: 'Vancouver', label: 'Vancouver' },
+        { value: 'Montreal', label: 'Montreal' },
+        { value: 'Calgary', label: 'Calgary' },
+        { value: 'Edmonton', label: 'Edmonton' },
+        { value: 'Ottawa', label: 'Ottawa' },
+        { value: 'Winnipeg', label: 'Winnipeg' }
+      ],
+      'United Kingdom': [
+        { value: '', label: 'Select City' },
+        { value: 'London', label: 'London' },
+        { value: 'Manchester', label: 'Manchester' },
+        { value: 'Birmingham', label: 'Birmingham' },
+        { value: 'Liverpool', label: 'Liverpool' },
+        { value: 'Leeds', label: 'Leeds' },
+        { value: 'Glasgow', label: 'Glasgow' },
+        { value: 'Sheffield', label: 'Sheffield' }
+      ],
+      'Australia': [
+        { value: '', label: 'Select City' },
+        { value: 'Sydney', label: 'Sydney' },
+        { value: 'Melbourne', label: 'Melbourne' },
+        { value: 'Brisbane', label: 'Brisbane' },
+        { value: 'Perth', label: 'Perth' },
+        { value: 'Adelaide', label: 'Adelaide' },
+        { value: 'Gold Coast', label: 'Gold Coast' },
+        { value: 'Canberra', label: 'Canberra' }
+      ],
+      'Germany': [
+        { value: '', label: 'Select City' },
+        { value: 'Berlin', label: 'Berlin' },
+        { value: 'Hamburg', label: 'Hamburg' },
+        { value: 'Munich', label: 'Munich' },
+        { value: 'Cologne', label: 'Cologne' },
+        { value: 'Frankfurt', label: 'Frankfurt' },
+        { value: 'Stuttgart', label: 'Stuttgart' },
+        { value: 'Düsseldorf', label: 'Düsseldorf' }
+      ],
+      'France': [
+        { value: '', label: 'Select City' },
+        { value: 'Paris', label: 'Paris' },
+        { value: 'Marseille', label: 'Marseille' },
+        { value: 'Lyon', label: 'Lyon' },
+        { value: 'Toulouse', label: 'Toulouse' },
+        { value: 'Nice', label: 'Nice' },
+        { value: 'Nantes', label: 'Nantes' },
+        { value: 'Strasbourg', label: 'Strasbourg' }
+      ],
+      'Spain': [
+        { value: '', label: 'Select City' },
+        { value: 'Madrid', label: 'Madrid' },
+        { value: 'Barcelona', label: 'Barcelona' },
+        { value: 'Valencia', label: 'Valencia' },
+        { value: 'Seville', label: 'Seville' },
+        { value: 'Zaragoza', label: 'Zaragoza' },
+        { value: 'Málaga', label: 'Málaga' },
+        { value: 'Murcia', label: 'Murcia' }
+      ],
+      'Italy': [
+        { value: '', label: 'Select City' },
+        { value: 'Rome', label: 'Rome' },
+        { value: 'Milan', label: 'Milan' },
+        { value: 'Naples', label: 'Naples' },
+        { value: 'Turin', label: 'Turin' },
+        { value: 'Palermo', label: 'Palermo' },
+        { value: 'Genoa', label: 'Genoa' },
+        { value: 'Bologna', label: 'Bologna' }
+      ],
+      'Japan': [
+        { value: '', label: 'Select City' },
+        { value: 'Tokyo', label: 'Tokyo' },
+        { value: 'Yokohama', label: 'Yokohama' },
+        { value: 'Osaka', label: 'Osaka' },
+        { value: 'Nagoya', label: 'Nagoya' },
+        { value: 'Sapporo', label: 'Sapporo' },
+        { value: 'Kobe', label: 'Kobe' },
+        { value: 'Kyoto', label: 'Kyoto' }
+      ],
+      'China': [
+        { value: '', label: 'Select City' },
+        { value: 'Beijing', label: 'Beijing' },
+        { value: 'Shanghai', label: 'Shanghai' },
+        { value: 'Guangzhou', label: 'Guangzhou' },
+        { value: 'Shenzhen', label: 'Shenzhen' },
+        { value: 'Chengdu', label: 'Chengdu' },
+        { value: 'Chongqing', label: 'Chongqing' },
+        { value: 'Tianjin', label: 'Tianjin' }
+      ],
+      'India': [
+        { value: '', label: 'Select City' },
+        { value: 'Mumbai', label: 'Mumbai' },
+        { value: 'Delhi', label: 'Delhi' },
+        { value: 'Bangalore', label: 'Bangalore' },
+        { value: 'Hyderabad', label: 'Hyderabad' },
+        { value: 'Ahmedabad', label: 'Ahmedabad' },
+        { value: 'Chennai', label: 'Chennai' },
+        { value: 'Kolkata', label: 'Kolkata' }
+      ],
+      'Bangladesh': [
+        { value: '', label: 'Select City' },
+        { value: 'Dhaka', label: 'Dhaka' },
+        { value: 'Chittagong', label: 'Chittagong' },
+        { value: 'Khulna', label: 'Khulna' },
+        { value: 'Rajshahi', label: 'Rajshahi' },
+        { value: 'Sylhet', label: 'Sylhet' },
+        { value: 'Barisal', label: 'Barisal' },
+        { value: 'Rangpur', label: 'Rangpur' }
+      ]
+    };
+
+    return citiesByCountry[formData.country] || [{ value: '', label: 'Select City' }];
+  };
 
   return (
     <div>
@@ -179,6 +257,7 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                     disabled={loading}
+                    readOnly
                   />
                 </div>
               </div>
@@ -200,8 +279,8 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <textarea
-                  name="location.address"
-                  value={formData.location.address}
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   rows="3"
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none disabled:opacity-50"
@@ -213,65 +292,33 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
 
             {/* City, State, Zip, Country Fields in Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* City */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <CustomSelect
-                  value={formData.location.city}
-                  onChange={(value) => handleLocationChange('city', value)}
-                  options={cityOptions}
-                  className="w-full disabled:opacity-50"
-                  variant="admin"
-                  disabled={loading}
-                />
-              </div>
-
-              {/* State */}
-              {/* <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  State
-                </label>
-                <input
-                  type="text"
-                  name="location.state"
-                  value={formData.location.state}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                  placeholder="State"
-                  disabled={loading}
-                />
-              </div> */}
-
-              {/* Zip Code */}
-              {/* <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Zip Code
-                </label>
-                <input
-                  type="text"
-                  name="location.zip"
-                  value={formData.location.zip}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                  placeholder="Zip Code"
-                  disabled={loading}
-                />
-              </div> */}
-
               {/* Country */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Country
                 </label>
                 <CustomSelect
-                  value={formData.location.country}
+                  value={formData.country}
                   onChange={(value) => handleLocationChange('country', value)}
                   options={countryOptions}
                   className="w-full disabled:opacity-50"
                   variant="admin"
                   disabled={loading}
+                />
+              </div>
+
+              {/* City - Shows based on selected country */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  City
+                </label>
+                <CustomSelect
+                  value={formData.city}
+                  onChange={(value) => handleLocationChange('city', value)}
+                  options={getCityOptions()}
+                  className="w-full disabled:opacity-50"
+                  variant="admin"
+                  disabled={loading || !formData.country}
                 />
               </div>
             </div>
@@ -356,8 +403,8 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
               <MapPin className="h-5 w-5 text-blue-600" />
               Location Information
             </h3>
-            
-            {user.location?.address ? (
+
+            {user?.address ? (
               <div className="space-y-6">
                 {/* Address */}
                 <div className="space-y-2">
@@ -368,7 +415,7 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
                     <div className="flex">
                       <MapPin className="h-5 w-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0" />
                       <p className="font-medium text-gray-900 leading-relaxed">
-                        {user.location.address}
+                        {user.address}
                       </p>
                     </div>
                   </div>
@@ -376,17 +423,6 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
 
                 {/* City, Country Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* City */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      City
-                    </label>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="font-medium text-gray-900">
-                        {user.location.city || 'Not provided'}
-                      </p>
-                    </div>
-                  </div>
 
                   {/* Country */}
                   <div className="space-y-2">
@@ -395,37 +431,21 @@ export function PersonalInfo({ user, editMode, onSave, loading }) {
                     </label>
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <p className="font-medium text-gray-900">
-                        {user.location.country || 'Not provided'}
+                        {user.country || 'Not provided'}
                       </p>
                     </div>
                   </div>
-                </div>
-
-                {/* State and Zip Code */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* State */}
-                  {/* <div className="space-y-2">
+                  {/* City */}
+                  <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      State
+                      City
                     </label>
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <p className="font-medium text-gray-900">
-                        {user.location.state || 'Not provided'}
+                        {user.city || 'Not provided'}
                       </p>
                     </div>
-                  </div> */}
-
-                  {/* Zip Code */}
-                  {/* <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Zip Code
-                    </label>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="font-medium text-gray-900">
-                        {user.location.zip || 'Not provided'}
-                      </p>
-                    </div>
-                  </div> */}
+                  </div>
                 </div>
               </div>
             ) : (

@@ -21,60 +21,49 @@ import { DocumentsInfo } from './DocumentsInfo';
 import { PreferencesInfo } from './PreferencesInfo';
 import axios from 'axios';
 import { ChangePassword } from './ChangePassword';
+import { set } from 'zod';
 
 export default function TenantProfile() {
-  const { user: authUser, updateProfile } = useAuthContext();
+  const { user: authUser, updateProfile, getProfile } = useAuthContext();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [editMode, setEditMode] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [documents, setDocuments] = useState([]);
 
 
   useEffect(() => {
-    if (authUser) {
-      const transformedUser = {
-        id: authUser._id,
-        name: authUser.name,
-        email: authUser.email,
-        phone: authUser.profile?.phone || '',
-        company: authUser.profile?.company || '',
-        avatar: authUser.profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.name}`,
-        joinDate: authUser.createdAt ? new Date(authUser.createdAt).toISOString() : new Date().toISOString(),
-        status: 'active',
-        location: {
-          address: authUser.profile?.address?.street || '',
-          city: authUser.profile?.address?.city || '',
-          state: '',
-          zip: '',
-          country: authUser.profile?.address?.country || '',
-        },
-        emergencyContact: {
-          name: 'Jane Doe',
-          phone: '+1 (555) 987-6543',
-          relationship: 'Spouse'
-        },
-        preferences: {
-          notifications: true,
-          emailUpdates: true,
-          smsAlerts: false,
-          autoPay: true
-        },
-        documents: [
-          { id: 1, name: 'Lease Agreement', type: 'pdf', date: '2024-01-15' },
-          { id: 2, name: 'ID Proof', type: 'jpg', date: '2024-01-10' },
-        ],
-        properties: [],
-        paymentMethods: [],
-      };
-      setUser(transformedUser);
+    async function fetchProfile() {
+      if (authUser) {
+        const profile = await getProfile();
 
-      setImagePreview(
-        transformedUser.avatar ||
-        `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.name}`
-      );
+        const transformedUser = {
+          id: profile._id,
+          name: profile.name,
+          email: profile.email,
+          phone: profile?.tenantInfo?.phone || '',
+          avatar: profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`,
+          joinDate: profile.createdAt ? new Date(profile.createdAt).toISOString() : new Date().toISOString(),
+          status: 'active',
+          address: profile?.tenantInfo?.address || '',
+          city: profile?.tenantInfo?.city || '',
+          country: profile?.tenantInfo?.country || '',
+
+          documents: profile?.tenantInfo?.documents || [],
+        };
+        setUser(transformedUser);
+        setDocuments(transformedUser.documents);
+
+        setImagePreview(
+          transformedUser.avatar ||
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.name}`
+        );
+      }
     }
+
+    fetchProfile();
   }, [authUser]);
 
   const handleSaveProfile = async (formData) => {
@@ -98,20 +87,31 @@ export default function TenantProfile() {
 
       const payload = {
         name: formData.name,
-        profile: {
-          phone: formData.phone,
-          company: formData.company || '',
-          avatar: avatarUrl,
-          address: {
-            street: formData.location?.address || '',
-            city: formData.location?.city || '',
-            country: formData.location?.country || '',
-          },
-        },
-      };
+        phone: formData.phone,
+        avatar: avatarUrl,
+        address: formData.address || '',
+        city: formData.city || '',
+        country: formData.country || '',
+
+      }
 
       await updateProfile(payload);
+      const updatedProfile = await getProfile();
 
+      const transformedUser = {
+        id: updatedProfile._id,
+        name: updatedProfile.name,
+        email: updatedProfile.email,
+        phone: updatedProfile?.tenantInfo?.phone || '',
+        avatar: avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${updatedProfile.name}`,
+        joinDate: updatedProfile.createdAt ? new Date(updatedProfile.createdAt).toISOString() : new Date().toISOString(),
+        status: 'active',
+        address: updatedProfile?.tenantInfo?.address || '',
+        city: updatedProfile?.tenantInfo?.city || '',
+        country: updatedProfile?.tenantInfo?.country || '',
+      };
+
+      setUser(transformedUser);
       setEditMode(false);
       setImageFile(null);
     } catch (error) {
@@ -122,40 +122,15 @@ export default function TenantProfile() {
   };
 
 
-  const handleAvatarUpload = async (file) => {
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload/image`,
-      formData,
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-
-    // Cloudinary URL
-    setImagePreview(res.data.data.url);
-
-    return res.data.data.url;
-  };
-
-  const handleUploadDocument = async (file) => {
+  const handleUploadDocument = async (newDocument) => {
     setLoading(true);
     try {
-      // Implement actual file upload logic here
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Example upload endpoint
-      // await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload`, formData, {
-      //   withCredentials: true,
-      //   headers: { 'Content-Type': 'multipart/form-data' }
-      // });
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Document uploaded successfully!');
+      // Update documents state
+      console.log({ newDocument });
+      await updateProfile({
+        documents: [...documents, newDocument]
+      });
+      setDocuments(prev => [...prev, newDocument]);
     } catch (error) {
       toast.error('Failed to upload document');
     } finally {
@@ -243,14 +218,6 @@ export default function TenantProfile() {
                 <span className="text-gray-600">Member Since</span>
                 <span className="font-medium">{new Date(user.joinDate).getFullYear()}</span>
               </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Properties</span>
-                <span className="font-medium">{user.properties?.length || 0}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Documents</span>
-                <span className="font-medium">{user.documents?.length || 0}</span>
-              </div>
             </div>
 
             {/* Navigation */}
@@ -322,23 +289,15 @@ export default function TenantProfile() {
                 />
               )}
 
-              {activeTab === 'properties' && (
-                <PropertiesInfo properties={user.properties || []} />
-              )}
 
               {activeTab === 'documents' && (
                 <DocumentsInfo
-                  documents={user.documents || []}
+                  documents={documents || []}
                   onUpload={handleUploadDocument}
                 />
               )}
 
-              {activeTab === 'preferences' && (
-                <PreferencesInfo
-                  preferences={user.preferences || {}}
-                  onUpdate={handleSaveProfile}
-                />
-              )}
+              
             </div>
           </div>
         </div>
