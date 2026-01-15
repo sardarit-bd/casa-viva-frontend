@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Home, MapPin, DollarSign, Bed, Bath, 
+import {
+  Home, MapPin, DollarSign, Bed, Bath,
   Upload, X, Star, Calendar, Ruler,
   Loader2
 } from 'lucide-react';
 import CustomSelect from '@/components/dashboard/Admin/CustomSelect';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function PropertyForm({
   isEditMode = false,
@@ -48,7 +50,7 @@ export default function PropertyForm({
 
   // Cities
   const cities = [
-    'Punta Cana', 'Bavaro', 'Cap Cana', 'Macao', 
+    'Punta Cana', 'Bavaro', 'Cap Cana', 'Macao',
     'Uvero Alto', 'Cabeza de Toro', 'Cortecito'
   ];
 
@@ -138,7 +140,7 @@ export default function PropertyForm({
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -152,52 +154,49 @@ export default function PropertyForm({
     }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    if (!files.length) return;
 
     setUploading(true);
 
-    const newImages = [];
-    files.forEach(file => {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert(`${file.name} is not an image file`);
-        return;
-      }
+    try {
+      const formData = new FormData();
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} is too large. Max size is 5MB`);
-        return;
-      }
+      files.forEach(file => {
+        formData.append('images', file);
+      });
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newImages.push({
-          url: reader.result,
-          file: file,
-          name: file.name,
-          isCover: images.length === 0 && newImages.length === 0
-        });
-        
-        if (newImages.length === files.length) {
-          setImages(prev => [...prev, ...newImages]);
-          setUploading(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload/images`,
+        formData,
+        { withCredentials: true }
+      );
+
+      const uploadedImages = res.data.data.map((img, index) => ({
+        url: img.url,
+        publicId: img.publicId,
+        isCover: images.length === 0 && index === 0
+      }));
+
+      setImages(prev => [...prev, ...uploadedImages]);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to upload images');
+    } finally {
+      setUploading(false);
+    }
 
     e.target.value = '';
   };
+
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const setCoverImage = (index) => {
-    setImages(prev => 
+    setImages(prev =>
       prev.map((img, i) => ({
         ...img,
         isCover: i === index
@@ -207,7 +206,7 @@ export default function PropertyForm({
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    
+
     // Prepare final form data with images
     const finalData = {
       ...formData,
@@ -232,12 +231,12 @@ export default function PropertyForm({
   return (
     <form id="property-form" onSubmit={handleFormSubmit}>
       {/* Hidden submit button for external trigger */}
-      <button 
-        id="property-form-submit" 
-        type="submit" 
+      <button
+        id="property-form-submit"
+        type="submit"
         style={{ display: 'none' }}
       />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Form Fields */}
         <div className="lg:col-span-2 space-y-6">
@@ -246,7 +245,7 @@ export default function PropertyForm({
             <h2 className="text-lg font-semibold text-gray-900 mb-6">
               Basic Information
             </h2>
-            
+
             <div className="space-y-6">
               {/* Title */}
               <div>
@@ -260,9 +259,8 @@ export default function PropertyForm({
                   onChange={handleInputChange}
                   disabled={submitting}
                   placeholder="e.g., Luxury Beachfront Villa with Private Pool"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                    errors.title ? 'border-red-300' : 'border-gray-300'
-                  } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.title ? 'border-red-300' : 'border-gray-300'
+                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 />
                 {errors.title && (
                   <p className="mt-1 text-sm text-red-600">{errors.title}</p>
@@ -281,9 +279,8 @@ export default function PropertyForm({
                   disabled={submitting}
                   rows={4}
                   placeholder="Describe your property in detail..."
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                    errors.description ? 'border-red-300' : 'border-gray-300'
-                  } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.description ? 'border-red-300' : 'border-gray-300'
+                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -300,11 +297,10 @@ export default function PropertyForm({
                     {propertyTypes.map(type => (
                       <label
                         key={type.value}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${
-                          formData.type === type.value
+                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${formData.type === type.value
                             ? 'border-[#004087] bg-[#004087] text-white'
                             : 'border-gray-300 hover:border-gray-400'
-                        } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <input
                           type="radio"
@@ -329,11 +325,10 @@ export default function PropertyForm({
                     Listing Type *
                   </label>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all ${
-                      formData.listingType === 'rent'
+                    <label className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all ${formData.listingType === 'rent'
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-300 hover:border-gray-400'
-                    } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <input
                         type="radio"
                         name="listingType"
@@ -346,12 +341,11 @@ export default function PropertyForm({
                       <Calendar className="h-6 w-6 mb-2 text-blue-600" />
                       <span className="font-medium">For Rent</span>
                     </label>
-                    
-                    <label className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all ${
-                      formData.listingType === 'sale'
+
+                    <label className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all ${formData.listingType === 'sale'
                         ? 'border-green-500 bg-green-50'
                         : 'border-gray-300 hover:border-gray-400'
-                    } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <input
                         type="radio"
                         name="listingType"
@@ -391,7 +385,7 @@ export default function PropertyForm({
               <MapPin className="h-5 w-5 mr-2" />
               Location
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -446,9 +440,8 @@ export default function PropertyForm({
                   onChange={handleInputChange}
                   disabled={submitting}
                   placeholder="Enter full address"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                    errors.address ? 'border-red-300' : 'border-gray-300'
-                  } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.address ? 'border-red-300' : 'border-gray-300'
+                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 />
                 {errors.address && (
                   <p className="mt-1 text-sm text-red-600">{errors.address}</p>
@@ -462,7 +455,7 @@ export default function PropertyForm({
             <h2 className="text-lg font-semibold text-gray-900 mb-6">
               Property Details
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Price */}
               <div>
@@ -482,15 +475,14 @@ export default function PropertyForm({
                     placeholder="0.00"
                     min="0"
                     step="0.01"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                      errors.price ? 'border-red-300' : 'border-gray-300'
-                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.price ? 'border-red-300' : 'border-gray-300'
+                      } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                   />
                 </div>
                 {errors.price && (
                   <p className="mt-1 text-sm text-red-600">{errors.price}</p>
                 )}
-                
+
                 {formData.listingType === 'rent' && (
                   <div className="mt-3">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -526,9 +518,8 @@ export default function PropertyForm({
                     placeholder="0"
                     min="0"
                     max="50"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                      errors.bedrooms ? 'border-red-300' : 'border-gray-300'
-                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.bedrooms ? 'border-red-300' : 'border-gray-300'
+                      } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                   />
                 </div>
                 {errors.bedrooms && (
@@ -555,9 +546,8 @@ export default function PropertyForm({
                     min="0"
                     max="50"
                     step="0.5"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${
-                      errors.bathrooms ? 'border-red-300' : 'border-gray-300'
-                    } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent ${errors.bathrooms ? 'border-red-300' : 'border-gray-300'
+                      } ${submitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                   />
                 </div>
                 {errors.bathrooms && (
@@ -573,11 +563,10 @@ export default function PropertyForm({
                 {amenitiesOptions.map(amenity => (
                   <label
                     key={amenity.value}
-                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
-                      formData.amenities.includes(amenity.value)
+                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${formData.amenities.includes(amenity.value)
                         ? 'border-[#004087] bg-[#004087] text-white'
                         : 'border-gray-300 hover:border-gray-400'
-                    } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <input
                       type="checkbox"
@@ -614,7 +603,7 @@ export default function PropertyForm({
             <h2 className="text-lg font-semibold text-gray-900 mb-6">
               Property Photos *
             </h2>
-            
+
             {/* Clickable Upload Area */}
             <input
               type="file"
@@ -625,16 +614,14 @@ export default function PropertyForm({
               disabled={submitting || uploading}
               className="hidden"
             />
-            
+
             <label
               htmlFor="image-upload"
-              className={`block cursor-pointer ${errors.images ? 'border-red-300' : ''} ${
-                (submitting || uploading) ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`block cursor-pointer ${errors.images ? 'border-red-300' : ''} ${(submitting || uploading) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
             >
-              <div className={`aspect-video rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-8 transition-all ${
-                errors.images ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#004087] hover:bg-gray-50'
-              }`}>
+              <div className={`aspect-video rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-8 transition-all ${errors.images ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#004087] hover:bg-gray-50'
+                }`}>
                 {uploading ? (
                   <>
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#004087] mb-4"></div>
@@ -657,11 +644,11 @@ export default function PropertyForm({
                 )}
               </div>
             </label>
-            
+
             {errors.images && (
               <p className="mt-2 text-sm text-red-600">{errors.images}</p>
             )}
-            
+
             <p className="mt-4 text-sm text-gray-500">
               Upload at least 3 high-quality images. First image will be used as cover.
             </p>
@@ -683,7 +670,7 @@ export default function PropertyForm({
                     </button>
                   )}
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-3">
                   {images.map((image, index) => (
                     <div key={index} className="relative group">
@@ -743,9 +730,8 @@ export default function PropertyForm({
                   disabled={submitting}
                   className="sr-only peer"
                 />
-                <div className={`w-12 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500 ${
-                  submitting ? 'opacity-50 cursor-not-allowed' : ''
-                }`}></div>
+                <div className={`w-12 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500 ${submitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}></div>
               </label>
             </div>
 
@@ -773,7 +759,7 @@ export default function PropertyForm({
           {/* Preview Card */}
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Live Preview</h3>
-            
+
             <div className="space-y-4">
               {/* Image Preview */}
               <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
@@ -854,9 +840,8 @@ export default function PropertyForm({
             <button
               type="submit"
               disabled={submitting}
-              className={`w-full py-3 bg-[#004087] text-white rounded-lg hover:bg-[#004797] flex items-center justify-center transition-colors ${
-                submitting ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+              className={`w-full py-3 bg-[#004087] text-white rounded-lg hover:bg-[#004797] flex items-center justify-center transition-colors ${submitting ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
             >
               {submitting ? (
                 <>

@@ -283,7 +283,7 @@ export default function TenantDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Properties */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl shadow-sm border p-6">
@@ -339,7 +339,7 @@ export default function TenantDashboard() {
             </div>
 
             {/* Upcoming Payments */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            {/* <div className="bg-white rounded-xl shadow-sm border p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Upcoming Payments</h2>
                 <Link href="/tenant/payments" className="text-[#004087] hover:text-[#0250a8] font-medium">
@@ -388,12 +388,10 @@ export default function TenantDashboard() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Maintenance Requests */}
+          {/* <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Maintenance Requests</h2>
@@ -436,7 +434,7 @@ export default function TenantDashboard() {
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
