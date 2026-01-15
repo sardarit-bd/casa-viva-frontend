@@ -1,23 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Star, 
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Star,
   Home,
   DollarSign,
   MapPin,
   Bed,
   Bath,
   MoreVertical,
-  DeleteIcon
+  ChevronRight,
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 import CustomSelect from '@/components/dashboard/Admin/CustomSelect';
+import axios from 'axios';
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState([]);
@@ -27,86 +30,38 @@ export default function PropertiesPage() {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedCity, setSelectedCity] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const itemsPerPage = 8;
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockProperties = [
-        {
-          id: 1,
-          title: 'Luxury Beachfront Villa',
-          description: 'Beautiful villa with ocean view',
-          address: 'Punta Cana, Bavaro',
-          type: 'villa',
-          city: 'Punta Cana',
-          price: 350,
-          bedrooms: 4,
-          bathrooms: 3,
-          featured: true,
-          status: 'active',
-          images: ['/villa1.jpg'],
-          createdAt: '2024-01-15'
-        },
-        {
-          id: 2,
-          title: 'Modern Condo with Ocean View',
-          description: 'New condo near beach',
-          address: 'Cap Cana, Punta Cana',
-          type: 'condo',
-          city: 'Punta Cana',
-          price: 220,
-          bedrooms: 2,
-          bathrooms: 2,
-          featured: false,
-          status: 'active',
-          images: ['/condo1.jpg'],
-          createdAt: '2024-01-10'
-        },
-        {
-          id: 3,
-          title: 'Golf Course Villa',
-          description: 'Luxury villa on golf course',
-          address: 'Cocotal Golf Course',
-          type: 'villa',
-          city: 'Punta Cana',
-          price: 450,
-          bedrooms: 5,
-          bathrooms: 4,
-          featured: true,
-          status: 'active',
-          images: ['/golf-villa.jpg'],
-          createdAt: '2024-01-05'
-        },
-        {
-          id: 4,
-          title: 'Studio Apartment',
-          description: 'Cozy studio in downtown',
-          address: 'Downtown Punta Cana',
-          type: 'apartment',
-          city: 'Punta Cana',
-          price: 120,
-          bedrooms: 1,
-          bathrooms: 1,
-          featured: false,
-          status: 'active',
-          images: ['/studio.jpg'],
-          createdAt: '2024-01-02'
-        },
-      ];
+    const fetchMyProperties = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/owner/my-properties`,
+          {
+            withCredentials: true
+          }
+        );
 
-      setProperties(mockProperties);
-      setFilteredProperties(mockProperties);
-      setLoading(false);
-    }, 1000);
+        if (res.data.success) {
+          setProperties(res.data.data);
+          setFilteredProperties(res.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch properties', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyProperties();
   }, []);
 
   // Filter properties
   useEffect(() => {
     let result = [...properties];
 
-    // Search filter
     if (searchTerm) {
       result = result.filter(property =>
         property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,17 +70,14 @@ export default function PropertiesPage() {
       );
     }
 
-    // Type filter
     if (selectedType !== 'all') {
       result = result.filter(property => property.type === selectedType);
     }
 
-    // City filter
     if (selectedCity !== 'all') {
       result = result.filter(property => property.city === selectedCity);
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredProperties(result);
     setCurrentPage(1);
   }, [searchTerm, selectedType, selectedCity, properties]);
@@ -150,6 +102,31 @@ export default function PropertiesPage() {
     total: properties.length,
     active: properties.filter(p => p.status === 'active').length,
     featured: properties.filter(p => p.featured).length
+  };
+
+  // Handle delete property
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/${id}`,
+        {
+          withCredentials: true
+        }
+      );
+      
+      // Remove property from state
+      setProperties(properties.filter(p => p._id !== id));
+      setFilteredProperties(filteredProperties.filter(p => p._id !== id));
+      
+      alert('Property deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete property', error);
+      alert('Failed to delete property');
+    }
   };
 
   if (loading) {
@@ -180,7 +157,7 @@ export default function PropertiesPage() {
             </div>
             <Link
               href="/dashboard/owner/properties/add"
-              className="flex items-center px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#004797]"
+              className="flex items-center px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#004797] transition-all duration-200 hover:scale-105 active:scale-95"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add New Property
@@ -192,61 +169,41 @@ export default function PropertiesPage() {
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Total Properties</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
-              </div>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Home className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Active Listings</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.active}</p>
-              </div>
-              <div className="p-2 bg-green-50 rounded-lg">
-                <div className="h-6 w-6 bg-green-600 rounded-full"></div>
+          {[
+            { title: "Total Properties", value: stats.total, icon: Home, color: "blue" },
+            { title: "Active Listings", value: stats.active, icon: Home, color: "green" },
+            { title: "Featured", value: stats.featured, icon: Star, color: "yellow" }
+          ].map((stat, idx) => (
+            <div key={idx} className="bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-500 text-sm">{stat.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                </div>
+                <div className={`p-2 bg-${stat.color}-50 rounded-lg`}>
+                  <stat.icon className={`h-6 w-6 text-${stat.color}-600`} />
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Featured</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.featured}</p>
-              </div>
-              <div className="p-2 bg-yellow-50 rounded-lg">
-                <Star className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search properties..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent transition-all duration-200"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
 
-            {/* Type Filter */}
             <div className="w-full md:w-40">
               <CustomSelect
                 value={selectedType}
@@ -257,7 +214,6 @@ export default function PropertiesPage() {
               />
             </div>
 
-            {/* City Filter */}
             <div className="w-full md:w-40">
               <CustomSelect
                 value={selectedCity}
@@ -273,104 +229,199 @@ export default function PropertiesPage() {
         {/* Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProperties.length > 0 ? (
-            filteredProperties.map((property) => (
-              <div key={property.id} className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                {/* Property Image */}
-                <div className="h-48 bg-gray-200 relative">
-                  <div className="h-full w-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                    <Home className="h-12 w-12 text-white" />
-                  </div>
-                  {property.featured && (
-                    <div className="absolute top-3 left-3">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        <Star className="h-3 w-3 mr-1" />
-                        Featured
-                      </span>
+            filteredProperties.map((property) => {
+              const coverImage =
+                property.images?.find(img => img.isCover)?.url ||
+                property.images?.[0]?.url;
+
+              return (
+                <div
+                  key={property._id}
+                  className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                >
+                  {/* Property Image */}
+                  <div className="h-48 bg-gray-200 relative group">
+                    {coverImage ? (
+                      <>
+                        <img
+                          src={coverImage}
+                          alt={property.title}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </>
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                        <Home className="h-12 w-12 text-white" />
+                      </div>
+                    )}
+
+                    {property.featured && (
+                      <div className="absolute top-3 left-3 animate-pulse">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 shadow-sm">
+                          <Star className="h-3 w-3 mr-1 fill-yellow-500" />
+                          Featured
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Action Menu - Improved UX */}
+                    <div className="absolute top-3 right-3">
+                      <div className="relative">
+                        <button
+                          className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white shadow-md hover:shadow-lg transition-all duration-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowDeleteConfirm(showDeleteConfirm === property._id ? null : property._id);
+                          }}
+                        >
+                          <MoreVertical className="h-4 w-4 text-gray-700" />
+                        </button>
+                        
+                        {/* Action Menu Dropdown */}
+                        <div className={`absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border transform transition-all duration-200 origin-top-right z-50
+                          ${showDeleteConfirm === property._id ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'}`}>
+                          <div className="py-1">
+                            {/* View Details Link */}
+                            <Link
+                              href={`/pages/properties/${property._id}`}
+                              className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 group"
+                              onClick={() => setShowDeleteConfirm(null)}
+                            >
+                              <div className="flex items-center">
+                                <Eye className="h-4 w-4 mr-3 text-gray-400 group-hover:text-blue-500" />
+                                View Details
+                              </div>
+                              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </Link>
+                            
+                            {/* Edit Link */}
+                            <Link
+                              href={`/dashboard/owner/properties/edit/${property._id}`}
+                              className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors duration-150 group"
+                              onClick={() => setShowDeleteConfirm(null)}
+                            >
+                              <div className="flex items-center">
+                                <Edit className="h-4 w-4 mr-3 text-gray-400 group-hover:text-green-500" />
+                                Edit Property
+                              </div>
+                              <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </Link>
+                            
+                            {/* Delete Button */}
+                            <button
+                              className="flex items-center justify-between w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 group"
+                              onClick={() => {
+                                setShowDeleteConfirm(null);
+                                if (window.confirm(`Are you sure you want to delete "${property.title}"? This action cannot be undone.`)) {
+                                  handleDelete(property._id);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center">
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                Delete Property
+                              </div>
+                              <AlertTriangle className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          </div>
+                          
+                          {/* Confirmation Tooltip (Optional) */}
+                          {showDeleteConfirm === property._id && (
+                            <div className="px-4 py-2 bg-red-50 border-t border-red-100">
+                              <p className="text-xs text-red-600">
+                                Deleting will permanently remove this property
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Close dropdown when clicking outside */}
+                      {showDeleteConfirm === property._id && (
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={() => setShowDeleteConfirm(null)}
+                        />
+                      )}
                     </div>
-                  )}
-                  <div className="absolute top-3 right-3">
-                    <div className="relative group">
-                      <button className="p-1.5 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white">
-                        <MoreVertical className="h-4 w-4 text-gray-700" />
+                    
+                    {/* Quick View Button */}
+                    <Link
+                      href={`/dashboard/owner/properties/detail/${property._id}`}
+                      className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0"
+                    >
+                      <button className="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200 flex items-center">
+                        <Eye className="h-3 w-3 mr-2" />
+                        Quick View
                       </button>
-                      <div className="absolute right-0 mt-0 w-40 bg-white rounded-lg shadow-lg border hidden group-hover:block z-10">
-                        <div className="py-1">
-                          <Link
-                            href={`/pages/properties/${property.id}`}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Link>
-                          <button
-                           
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            <DeleteIcon className="h-4 w-4 mr-2" />
-                            Delete Property
-                          </button>
+                    </Link>
+                  </div>
+
+                  {/* Property Details */}
+                  <div className="p-5">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-lg mb-1 hover:text-[#004087] transition-colors duration-200">
+                          {property.title}
+                        </h3>
+                        <div className="flex items-center text-gray-600 text-sm mb-3">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span className="truncate">{property.address}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900 text-lg">
+                          ${property.price}/{property.pricePeriod}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          per {property.pricePeriod}
                         </div>
                       </div>
                     </div>
+
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {property.description}
+                    </p>
+
+                    <div className="flex items-center justify-between border-t pt-4">
+                      <div className="flex items-center space-x-4">
+                        <span className="flex items-center text-sm bg-gray-50 px-2 py-1 rounded">
+                          <Bed className="h-4 w-4 mr-1 text-gray-500" />
+                          {property.bedrooms} beds
+                        </span>
+                        <span className="flex items-center text-sm bg-gray-50 px-2 py-1 rounded">
+                          <Bath className="h-4 w-4 mr-1 text-gray-500" />
+                          {property.bathrooms} baths
+                        </span>
+                      </div>
+                      <Link
+                        href={`/dashboard/owner/properties/edit/${property._id}`}
+                        className="text-[#1F3A34] hover:text-[#2a4d45] text-sm font-medium flex items-center hover:underline"
+                      >
+                        Edit
+                        <ChevronRight className="h-3 w-3 ml-1" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-
-                {/* Property Details */}
-                <div className="p-5">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg mb-1">
-                        {property.title}
-                      </h3>
-                      <div className="flex items-center text-gray-600 text-sm mb-3">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {property.address}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-gray-900 text-lg">
-                        ${property.price}/night
-                      </div>
-                      <div className="text-xs text-gray-500">per night</div>
-                    </div>
-                  </div>
-
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {property.description}
-                  </p>
-
-                  <div className="flex items-center justify-between border-t pt-4">
-                    <div className="flex items-center space-x-4">
-                      <span className="flex items-center text-sm">
-                        <Bed className="h-4 w-4 mr-1" />
-                        {property.bedrooms} beds
-                      </span>
-                      <span className="flex items-center text-sm">
-                        <Bath className="h-4 w-4 mr-1" />
-                        {property.bathrooms} baths
-                      </span>
-                    </div>
-                    <Link
-                      href={`/dashboard/owner/properties/edit/${property.id}`}
-                      className="text-[#1F3A34] hover:text-[#2a4d45] text-sm font-medium"
-                    >
-                      Edit →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="col-span-full">
               <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
                 <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Home className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
-                <p className="text-gray-600 mb-6">Try adjusting your search or filters</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No properties found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your search or filters
+                </p>
                 <Link
                   href="/owner/properties/add"
-                  className="inline-flex items-center px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#004797]"
+                  className="inline-flex items-center px-4 py-2 bg-[#004087] text-white rounded-lg hover:bg-[#004797] hover:shadow-md transition-all duration-200"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Property
@@ -380,9 +431,9 @@ export default function PropertiesPage() {
           )}
         </div>
 
-        {/* Simple Stats */}
+        {/* Stats Cards at Bottom */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+          <div className="bg-gradient-to-r from-[#004087] to-[#004ca3] rounded-xl p-6 text-white hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-blue-100">Properties by Type</p>
@@ -390,9 +441,11 @@ export default function PropertiesPage() {
                   {Array.from(new Set(properties.map(p => p.type))).map(type => {
                     const count = properties.filter(p => p.type === type).length;
                     return (
-                      <div key={type} className="flex justify-between items-center">
+                      <div key={type} className="flex justify-between items-center hover:bg-blue-400/20 px-2 py-1 rounded transition-colors">
                         <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-                        <span className="font-semibold">{count}</span>
+                        <span className="font-semibold bg-white/20 px-2 py-1 rounded text-sm">
+                          {count}
+                        </span>
                       </div>
                     );
                   })}
@@ -401,8 +454,8 @@ export default function PropertiesPage() {
               <Home className="h-10 w-10 opacity-80" />
             </div>
           </div>
-          
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+
+          <div className="bg-gradient-to-r from-[#004087] to-[#004ca3] rounded-xl p-6 text-white hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-purple-100">Properties by City</p>
@@ -410,9 +463,11 @@ export default function PropertiesPage() {
                   {Array.from(new Set(properties.map(p => p.city))).map(city => {
                     const count = properties.filter(p => p.city === city).length;
                     return (
-                      <div key={city} className="flex justify-between items-center">
+                      <div key={city} className="flex justify-between items-center hover:bg-purple-400/20 px-2 py-1 rounded transition-colors">
                         <span>{city}</span>
-                        <span className="font-semibold">{count}</span>
+                        <span className="font-semibold bg-white/20 px-2 py-1 rounded text-sm">
+                          {count}
+                        </span>
                       </div>
                     );
                   })}
