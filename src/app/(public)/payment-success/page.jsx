@@ -4,11 +4,11 @@ import Link from "next/link";
 import { CheckCircle, CreditCard, CalendarDays, Package } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import axios from "axios";
 
 
-export default function Page() {
+export function PaymentSuccessPage() {
     const searchParam = useSearchParams()
     const sessionId = searchParam.get("session_id")
     const [data, setData] = useState(null);
@@ -82,3 +82,7 @@ export default function Page() {
         </div>
     );
 }
+
+export default function Page(){
+    return <Suspense fallback={<div>Loading...</div>}><PaymentSuccessPage /></Suspense>
+};
