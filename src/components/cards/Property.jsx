@@ -18,6 +18,7 @@ export default function PropertyCard({
 }) {
 
     const [isFavourite, setIsFavourite] = useState(false);
+    console.log(id)
 
     // Load favourite status from localStorage on component mount
     useEffect(() => {
