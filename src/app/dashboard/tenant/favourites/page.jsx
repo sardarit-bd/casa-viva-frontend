@@ -37,6 +37,19 @@ export default function TenantFavouritesPage() {
     const ids = JSON.parse(
       localStorage.getItem("favouriteProperties") || "[]"
     );
+    console.log(ids)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/fetchByIds`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: ids }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched blogs:", data);
+      })
+      .catch(err => console.error(err));
     const favProps = properties.filter((p) => ids.includes(p.id));
     setFavouriteProperties(favProps);
   };

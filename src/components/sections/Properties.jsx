@@ -17,7 +17,7 @@ export default function Properties() {
                 setLoading(true);
 
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties?limit=50`
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties?limit=50&featured=true`
                 );
 
                 const data = await res.json();

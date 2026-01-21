@@ -1,15 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Download, PenTool, LayoutGrid, List } from "lucide-react";
 import { dummyLeases } from "@/store/dummyLeases";
 import LeaseStatusBadge from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
+import { leaseService } from "@/services/lease.service";
 
 export default function TenantLeasesPage() {
     const router = useRouter();
     const [viewMode, setViewMode] = useState("list");
+    const [myLeases, setMyLease] = useState([])
 
+    useEffect(() => {
+            const fetchLease = async () => {
+                const res = await leaseService.getMyLeases();
+                const lease = res.data?.data
+               setMyLease(lease)
+            }
+            fetchLease()
+        }, [])
     const leases = useMemo(() => {
         return dummyLeases.filter(
             (l) => l.status !== "draft"
@@ -28,6 +38,9 @@ export default function TenantLeasesPage() {
         console.log("Download lease PDF:", id);
     };
 
+    if(!myLeases){
+    //    loading 
+    }
     return (
         <div className="p-6">
             {/* Header */}

@@ -61,6 +61,7 @@ export default function PropertiesPage() {
         );
     });
 
+    console.log(filtered)
     // CLEAR FILTERS
     const clearFilters = () => {
         setQuery("");
