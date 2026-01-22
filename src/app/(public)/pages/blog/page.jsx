@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import BlogFilters from "./BlogFilters";
 import BlogList from "./BlogList";
+import Loader from "@/components/common/Loader";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState([]);
@@ -38,7 +39,6 @@ export default function BlogPage() {
   }, []);
 
   // FILTER LOGIC
-  console.log(blogs)
   const filteredBlogs = blogs.filter((blog) => {
     return (
       (category === "all" || blog?.category?.toLowerCase() === category?.toLowerCase()) &&
@@ -74,7 +74,7 @@ export default function BlogPage() {
 
       {/* LIST */}
       {loading ? (
-        <p className="text-center text-gray-600 py-10">Loading articles...</p>
+        <Loader />
       ) : (
         <BlogList blogs={filteredBlogs} />
       )}
