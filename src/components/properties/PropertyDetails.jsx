@@ -35,34 +35,39 @@ export default function PropertyDetails({ property, user }) {
     } = property;
 
     useEffect(() => {
+        if (!user) return;
+
         const fetchLease = async () => {
-            const res = await leaseService.getMyLeases();
-            const lease = res.data?.data?.find(lease => lease?.property?._id === id)
-            if (lease) {
-                setMyLease(true)
-            } else {
-                setMyLease(false)
-            }
-        }
-        fetchLease()
-    }, [])
+            const res = await leaseService.getMyLeases({ role: "tenant" });
+            const lease = res.data?.data?.find(
+                (l) => l.property?._id === id && l.status !== "cancelled"
+            );
+            setMyLease(!!lease);
+        };
+
+        fetchLease();
+    }, [id, user]);
+
 
     const requestHandler = async () => {
         if (!user) {
             router.push("/pages/login");
             return;
         }
-        // Further request handling logic here
-        const payload = { property: property._id, tenant: user._id, landlord: owner._id };
-        const res = await leaseService.createLease(payload)
 
-        if (res.data?.success) {
-            toast.success("Request is sent to Landlord.")
-        } else {
-            toast.error(res?.data?.message || "Failed to send.")
+        try {
+            const res = await leaseService.createLease(property._id);
+
+            if (res.success) {
+                toast.success("Request sent to landlord");
+                setMyLease(true);
+            }
+        } catch (err) {
+            toast.error(err?.response?.data?.message || "Request failed");
         }
-        console.log(res)
-    }
+    };
+
+
     const agent = {
         name: owner?.name || "Not Assigned",
         phone: owner?.phone || "N/A",
@@ -93,7 +98,7 @@ export default function PropertyDetails({ property, user }) {
     const isLoggedIn = !!user;
     const isTenant = user?.role === "tenant";
     const hasLease = myLease;
-    
+
     // Determine button text based on conditions
     let buttonText = "";
     if (!isLoggedIn) {
@@ -105,7 +110,7 @@ export default function PropertyDetails({ property, user }) {
     } else {
         buttonText = "Request to Buy";
     }
-    
+
     const isButtonDisabled = !isLoggedIn || !isTenant || hasLease;
 
     return (
@@ -140,15 +145,14 @@ export default function PropertyDetails({ property, user }) {
                     {/* Action Button - Placed after price and address for good visibility */}
                     <button
                         disabled={isButtonDisabled}
-                        className={`w-full py-3.5 px-6 rounded-xl font-semibold text-lg transition-all duration-200 ${
-                            hasLease
-                                ? "bg-gray-400 text-white cursor-not-allowed"
-                                : !isLoggedIn
+                        className={`w-full py-3.5 px-6 rounded-xl font-semibold text-lg transition-all duration-200 ${hasLease
+                            ? "bg-gray-400 text-white cursor-not-allowed"
+                            : !isLoggedIn
                                 ? "bg-[#014087] hover:bg-[#014087]/90 text-white"
                                 : isTenant
-                                ? "bg-[#004087] hover:bg-[#003366] text-white"
-                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }`}
+                                    ? "bg-[#004087] hover:bg-[#003366] text-white"
+                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            }`}
                         onClick={() => {
                             if (!isLoggedIn) {
                                 // Redirect to login
@@ -218,7 +222,7 @@ export default function PropertyDetails({ property, user }) {
                         {/* Thumbnails Slider */}
                         <div className="overflow-hidden">
                             <div
-                                className="flex gap-4 transition-transform duration-300 ease-out"
+                                className="flex gap-4 p-3 transition-transform duration-300 ease-out"
                                 style={{ transform: `translateX(-${thumbIndex * 100}px)` }}
                             >
                                 {gallery.map((img, i) => (

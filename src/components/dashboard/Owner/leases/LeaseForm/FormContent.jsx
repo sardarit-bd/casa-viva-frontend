@@ -15,6 +15,10 @@ export function FormContent({
   setPreviewMode,
   watch
 }) {
+  const currentMonthlyRent = watch('monthlyRent');
+
+  console.log('FormContent render - monthlyRent:', currentMonthlyRent);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
@@ -134,7 +138,7 @@ export function FormContent({
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Occupants
             </label>
@@ -144,7 +148,7 @@ export function FormContent({
               placeholder="List all occupants (e.g., John Doe, Jane Doe)"
               rows="3"
             />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -160,18 +164,26 @@ export function FormContent({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Monthly Rent *
             </label>
+
             <div className="relative">
-              <span className="absolute left-3 top-2">$</span>
+              <span className="absolute left-3 top-2.5 text-gray-500">$</span>
               <input
-                {...register('monthlyRent')}
-                className="w-full pl-8 pr-4 py-2 border rounded-lg"
+                {...register("monthlyRent")}
+                type="number"
+                step="0.01"
+                readOnly
+                className="w-full pl-8 pr-4 py-2 border rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
                 placeholder="0.00"
               />
             </div>
+
             {errors.monthlyRent && (
-              <p className="text-red-500 text-sm mt-1">{errors.monthlyRent.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.monthlyRent.message}
+              </p>
             )}
           </div>
+
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -202,16 +214,17 @@ export function FormContent({
             )}
           </div>
 
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Security Deposit *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2">$</span>
+              <span className="absolute left-3 top-2.5 text-gray-500">$</span>
               <input
                 {...register('securityDeposit')}
-                className="w-full pl-8 pr-4 py-2 border rounded-lg"
+                type="number"
+                step="0.01"
+                className="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent"
                 placeholder="0.00"
               />
             </div>
@@ -248,7 +261,6 @@ export function FormContent({
               </p>
             )}
           </div>
-
         </div>
       </div>
 
@@ -318,7 +330,8 @@ export function FormContent({
             </label>
             <input
               {...register('noticeDays')}
-              className="w-full px-4 py-2 border rounded-lg"
+              type="number"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent"
               placeholder="30"
             />
             {errors.noticeDays && (
@@ -332,7 +345,7 @@ export function FormContent({
             </label>
             <textarea
               {...register('additionalTerms')}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent"
               placeholder="Add any custom terms or conditions here..."
               rows="6"
             />

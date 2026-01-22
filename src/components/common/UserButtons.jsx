@@ -14,7 +14,7 @@ export default function UserButtons() {
         <>
             {user ? (
                 <Link href="/dashboard">
-                    <button className="px-5 py-2 border border-[#1F3A34] rounded-full text-sm font-medium bg-[#004087] text-white transition w-full">
+                    <button className="cursor-pointer px-5 py-2 border border-[#1F3A34] rounded-full text-sm font-medium bg-[#004087] text-white transition w-full">
                         Dashboard
                     </button>
                 </Link>

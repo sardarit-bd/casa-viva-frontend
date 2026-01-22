@@ -1,15 +1,18 @@
+// frontend/src/app/dashboard/owner/leases/page.js
 "use client";
 
 import LeaseStatusBadge from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, Loader2 } from "lucide-react";
 import { leaseService } from "@/services/lease.service";
+import toast from "react-hot-toast";
 
 const FILTERS = [
   { key: "all", label: "All" },
-  { key: "draft", label: "Draft" },
+  { key: "pending_request", label: "Pending Requests" },
+  { key: "draft", label: "Drafts" },
   { key: "sent_to_tenant", label: "Sent" },
   { key: "changes_requested", label: "Changes" },
   { key: "signed_by_tenant", label: "Tenant Signed" },
@@ -19,12 +22,18 @@ const FILTERS = [
 ];
 
 function formatMoney(v) {
+  if (v === undefined || v === null) return "—";
+
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD"
+    }).format(v);
   } catch {
     return `$${v}`;
   }
 }
+
 
 export default function LeasesPage() {
   const router = useRouter();
@@ -34,28 +43,83 @@ export default function LeasesPage() {
   const [selectedLeases, setSelectedLeases] = useState([]);
   const [leases, setLeases] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    pendingSignatures: 0,
+    active: 0,
+    expiringSoon: 0
+  });
 
   useEffect(() => {
-    const fetchLeases = async () => {
-      try {
-        setLoading(true);
-        const res = await leaseService.getMyLeases({
-          role: "landlord",
-          status: filter !== "all" ? filter : undefined,
-        });
-
-        setLeases(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch leases", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLeases();
+    fetchStats();
   }, [filter]);
 
+  const fetchLeases = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log('Fetching leases with filter:', filter);
+
+      const res = await leaseService.getMyLeases({
+        role: "landlord",
+        status: filter !== "all" ? filter : undefined,
+      });
+
+      if (res.success) {
+        setLeases(res.data || []);
+
+        // Update stats based on fetched data
+        updateStatsFromLeases(res.data || []);
+      } else {
+        setError(res.message || 'Failed to fetch leases');
+      }
+    } catch (err) {
+      console.error("Failed to fetch leases", err);
+      setError(err.message || 'Failed to fetch leases');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await leaseService.getLeaseStats();
+      if (res.success) {
+        setStats({
+          total: res.data.counts?.total || 0,
+          pendingSignatures: res.data.byStatus?.find(s => s.status === 'sent_to_tenant')?.count || 0,
+          active: res.data.byStatus?.find(s => s.status === 'fully_executed')?.count || 0,
+          expiringSoon: res.data.expiringSoon || 0
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch stats", err);
+    }
+  };
+
+  const updateStatsFromLeases = (leasesData) => {
+    const pendingSignatures = leasesData.filter(l => l.status === 'sent_to_tenant').length;
+    const active = leasesData.filter(l => l.status === 'fully_executed').length;
+    const expiringSoon = leasesData.filter(l => {
+      if (l.status !== 'fully_executed' || !l.endDate) return false;
+      const endDate = new Date(l.endDate);
+      const now = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(now.getDate() + 30);
+      return endDate >= now && endDate <= thirtyDaysFromNow;
+    }).length;
+
+    setStats(prev => ({
+      ...prev,
+      total: leasesData.length,
+      pendingSignatures,
+      active,
+      expiringSoon
+    }));
+  };
 
   const rows = useMemo(() => {
     const text = q.trim().toLowerCase();
@@ -70,63 +134,102 @@ export default function LeasesPage() {
           l.tenant?.name?.toLowerCase().includes(text)
         );
       })
-      .map(l => ({
-        id: l._id,
-        propertyTitle: l.property?.title,
+      .map(l => {
+        const rentValue = l.rentAmount || l.property?.price || 0;
+        return {
+           id: l._id,
+        propertyTitle: l.property?.title || 'N/A',
         propertyAddress: `${l.property?.address || ""}, ${l.property?.city || ""}`,
-        tenantName: l.tenant?.name,
-        tenantEmail: l.tenant?.email,
-        rent: l.rentAmount,
-        status: l.status,
-        startDate: new Date(l.startDate).toLocaleDateString(),
-        endDate: new Date(l.endDate).toLocaleDateString(),
-        updatedAt: new Date(l.updatedAt).toLocaleDateString(),
-        signedDate: l.isFullySigned
-          ? new Date(l.updatedAt).toLocaleDateString()
-          : null,
-        leaseType: "fixed_term",
+        tenantName: l.tenant?.name || 'N/A',
+        tenantEmail: l.tenant?.email || 'N/A',
+        rent: rentValue,
+        status: l.status || 'draft',
+        startDate: l.startDate ? new Date(l.startDate).toLocaleDateString() : 'Not set',
+        endDate: l.endDate ? new Date(l.endDate).toLocaleDateString() : 'Not set',
+        updatedAt: l.updatedAt ? new Date(l.updatedAt).toLocaleDateString() : 'N/A',
+        signedDate: l.signatures?.tenant?.signedAt
+          ? new Date(l.signatures.tenant.signedAt).toLocaleDateString()
+          : l.signatures?.landlord?.signedAt
+            ? new Date(l.signatures.landlord.signedAt).toLocaleDateString()
+            : null,
+        isFullySigned: l.signatures?.tenant?.signedAt && l.signatures?.landlord?.signedAt,
+        leaseType: l.rentFrequency === 'monthly' ? 'fixed_term' : 'variable',
         paymentDay: 1,
-      }));
+        securityDeposit: l.securityDeposit || 0,
+        landlordName: l.landlord?.name || 'N/A',
+        }
+      });
   }, [leases, q]);
 
-
-  const handleCreateLease = () => {
-    router.push("/dashboard/owner/leases/create?prefill=true");
-  };
-
-  const handleQuickCreate = async () => {
+  const handleSendForSignature = async (leaseId) => {
     try {
-      // API call to create lease from template
-      const response = await fetch('/api/leases/templates/default', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      router.push(`/dashboard/owner/leases/${data.id}/edit`);
-    } catch (error) {
-      console.error('Error creating lease:', error);
-    }
-  };
+      console.log('Sending lease for signature:', leaseId);
+      const response = await leaseService.sendToTenant(leaseId, "Please review and sign the lease agreement.");
 
-  const handleSendForSignature = (leaseId) => {
-    console.log('Sending lease for signature:', leaseId);
+      if (response.success) {
+        toast.success('Lease sent to tenant successfully!');
+        fetchLeases(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error sending lease:', error);
+      toast.error(error.response?.data?.message || 'Failed to send lease');
+    }
   };
 
   const handleDownloadPDF = (leaseId) => {
     console.log('Downloading PDF for lease:', leaseId);
+    // Implement PDF download logic here
   };
 
+  const handleApproveRequest = async (leaseId) => {
+    try {
+      console.log('Approving lease request:', leaseId);
+      const response = await leaseService.approveRequest(leaseId);
 
-  // if (loading) {
-  //   return (
-  //     <div className="p-6 flex justify-center items-center">
-  //       <div className="animate-spin h-10 w-10 border-2 border-[#004087] border-t-transparent rounded-full" />
-  //     </div>
-  //   );
-  // }
+      if (response.success) {
+        toast.success('Request approved! Lease draft created.');
+        fetchLeases(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error approving request:', error);
+      toast.error(error.response?.data?.message || 'Failed to approve request');
+    }
+  };
 
+  if (loading) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-[#004087]" />
+          <p className="text-gray-600">Loading leases...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
+              <span className="text-red-600 text-sm">!</span>
+            </div>
+            <h3 className="text-lg font-semibold text-red-800">Error Loading Leases</h3>
+          </div>
+
+          <p className="text-red-600 mb-4">{error}</p>
+
+          <button
+            onClick={fetchLeases}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -140,7 +243,6 @@ export default function LeasesPage() {
         </div>
 
         <div className="flex gap-2 flex-wrap">
-
           <Link
             href="/dashboard/owner/leases/create"
             className="px-4 py-2 rounded-full bg-[#004087] text-white text-sm font-medium hover:opacity-95 flex items-center"
@@ -165,7 +267,6 @@ export default function LeasesPage() {
               </>
             )}
           </button>
-
         </div>
       </div>
 
@@ -173,24 +274,24 @@ export default function LeasesPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white p-4 rounded-xl border">
           <p className="text-sm text-gray-500">Total Leases</p>
-          <p className="text-2xl font-bold text-[#1F3A34]">{rows.length}</p>
+          <p className="text-2xl font-bold text-[#1F3A34]">{stats.total}</p>
         </div>
         <div className="bg-white p-4 rounded-xl border">
           <p className="text-sm text-gray-500">Pending Signatures</p>
           <p className="text-2xl font-bold text-orange-600">
-            {rows.filter(l => l.status === 'sent_to_tenant').length}
+            {stats.pendingSignatures}
           </p>
         </div>
         <div className="bg-white p-4 rounded-xl border">
           <p className="text-sm text-gray-500">Active</p>
           <p className="text-2xl font-bold text-green-600">
-            {rows.filter(l => l.status === 'fully_executed').length}
+            {stats.active}
           </p>
         </div>
         <div className="bg-white p-4 rounded-xl border">
           <p className="text-sm text-gray-500">Expiring Soon</p>
           <p className="text-2xl font-bold text-red-600">
-            {rows.filter(l => l.status === 'expired').length}
+            {stats.expiringSoon}
           </p>
         </div>
       </div>
@@ -273,7 +374,7 @@ export default function LeasesPage() {
                       }}
                     />
                   </th>
-                  <th className="px-5 py-4">Lease</th>
+                  <th className="px-5 py-4">Lease ID</th>
                   <th className="px-5 py-4">Property</th>
                   <th className="px-5 py-4">Tenant</th>
                   <th className="px-5 py-4">Term</th>
@@ -292,7 +393,7 @@ export default function LeasesPage() {
                         </svg>
                         <p>No leases found.</p>
                         <button
-                          onClick={handleCreateLease}
+                          onClick={() => router.push('/dashboard/owner/leases/create')}
                           className="mt-2 text-[#004087] hover:underline"
                         >
                           Create your first lease
@@ -347,12 +448,13 @@ export default function LeasesPage() {
                       <td className="px-5 py-4">
                         <div className="font-semibold text-gray-800">{formatMoney(l.rent)}</div>
                         <div className="text-xs text-gray-500">Due day {l.paymentDay}</div>
+                        <div className="text-xs text-gray-500">Deposit: {formatMoney(l.securityDeposit)}</div>
                       </td>
 
                       <td className="px-5 py-4">
                         <LeaseStatusBadge status={l.status} />
                         <div className="text-xs text-gray-500 mt-1">
-                          {l.signedDate ? "Signed" : "Not signed"}
+                          {l.isFullySigned ? "Fully Signed" : "Not signed"}
                         </div>
                       </td>
 
@@ -369,6 +471,18 @@ export default function LeasesPage() {
                             View
                           </Link>
 
+                          {l.status === "pending_request" && (
+                            <button
+                              onClick={() => handleApproveRequest(l.id)}
+                              className="px-3 py-2 rounded-full text-sm bg-green-600 text-white hover:opacity-95 flex items-center"
+                            >
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Approve
+                            </button>
+                          )}
+
                           {(l.status === "draft" || l.status === "changes_requested") && (
                             <Link
                               href={`/dashboard/owner/leases/${l.id}/edit`}
@@ -381,15 +495,15 @@ export default function LeasesPage() {
                             </Link>
                           )}
 
-                          {(l.status === "sent_to_tenant" || l.status === "signed_by_tenant") && (
+                          {l.status === "draft" && (
                             <button
                               onClick={() => handleSendForSignature(l.id)}
                               className="px-3 py-2 rounded-full text-sm bg-blue-600 text-white hover:opacity-95 flex items-center"
                             >
                               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                               </svg>
-                              Sign
+                              Send
                             </button>
                           )}
 
@@ -424,8 +538,8 @@ export default function LeasesPage() {
             <div key={lease.id} className="bg-white rounded-xl border p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="font-bold text-[#1F3A34]">{lease.id}</h3>
-                  <p className="text-sm text-gray-500">{lease.propertyTitle}</p>
+                  <h3 className="font-bold text-[#1F3A34]">{lease.propertyTitle}</h3>
+                  <p className="text-sm text-gray-500">{lease.id}</p>
                 </div>
                 <LeaseStatusBadge status={lease.status} />
               </div>
@@ -456,20 +570,31 @@ export default function LeasesPage() {
                 >
                   View
                 </Link>
+
+                {lease.status === 'pending_request' && (
+                  <button
+                    onClick={() => handleApproveRequest(lease.id)}
+                    className="flex-1 text-center py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                  >
+                    Approve
+                  </button>
+                )}
+
                 {(lease.status === 'draft' || lease.status === 'changes_requested') && (
                   <Link
-                    href={`/dashboard/owner/leases/${lease.id}/edit`}
-                    className="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                    href={`/dashboard/owner/leases/${lease._id}/edit`}
+                    className="px-3 py-2 rounded-full text-sm border border-gray-200 hover:bg-white"
                   >
                     Edit
                   </Link>
                 )}
-                {lease.status === 'sent_to_tenant' && (
+
+                {lease.status === 'draft' && (
                   <button
                     onClick={() => handleSendForSignature(lease.id)}
-                    className="flex-1 text-center py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                    className="flex-1 text-center py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
                   >
-                    Sign
+                    Send
                   </button>
                 )}
               </div>

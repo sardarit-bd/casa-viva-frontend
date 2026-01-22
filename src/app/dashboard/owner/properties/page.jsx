@@ -292,7 +292,7 @@ export default function PropertiesPage() {
                     <div className="absolute top-3 right-3">
                       <div className="relative">
                         <button
-                          className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white shadow-md hover:shadow-lg transition-all duration-200"
+                          className="cursor-pointer p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white shadow-md hover:shadow-lg transition-all duration-200"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowDeleteConfirm(showDeleteConfirm === property._id ? null : property._id);
@@ -374,7 +374,7 @@ export default function PropertiesPage() {
                       href={`/dashboard/owner/properties/detail/${property._id}`}
                       className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0"
                     >
-                      <button className="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200 flex items-center">
+                      <button className="cursor-pointer px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200 flex items-center">
                         <Eye className="h-3 w-3 mr-2" />
                         Quick View
                       </button>

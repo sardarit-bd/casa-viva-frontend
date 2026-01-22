@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -24,7 +24,6 @@ import { useAuthContext } from '@/providers/AuthProvider';
 
 // Validation schema
 const leaseSchema = z.object({
-
   propertyId: z.string().min(1, "Property is required"),
   tenantId: z.string().min(1, "Tenant is required"),
   propertyAddress: z.string().min(1, 'Property address is required'),
@@ -58,25 +57,43 @@ export default function LeaseForm({
   const [leaseSigned, setLeaseSigned] = useState(false);
   const { user } = useAuthContext();
 
-  const defaultValues = initialData || {
+  // Prepare default values
+  const getDefaultValues = () => {
+    // If we have initialData (edit mode), use it
+    if (initialData) {
+      console.log('Using initialData for form:', initialData);
+      return initialData;
+    }
 
-    propertyId: propertyData?.id || "",
-    tenantId: tenantData?.id || "",
-    propertyAddress: propertyData?.address || '',
-    landlordName: landlordData?.name || '',
-    tenantName: tenantData?.name || '',
-    startDate: '',
-    endDate: '',
-    monthlyRent: propertyData?.rent || '',
-    paymentDay: '1',
-    securityDeposit: '',
-    paymentMethod: 'bank_transfer',
-    utilitiesIncluded: ['water', 'electricity'],
-    utilitiesTenantPaid: ['internet', 'cable'],
-    occupants: '',
-    noticeDays: '30',
-    additionalTerms: '',
-    leaseType: 'fixed_term',
+    // Otherwise prepare fresh data (create mode)
+    const monthlyRent = propertyData?.price !== undefined && propertyData?.price !== null
+      ? propertyData.price.toString()
+      : "";
+
+    console.log('Creating default values with propertyData:', {
+      price: propertyData?.price,
+      monthlyRent
+    });
+
+    return {
+      propertyId: propertyData?.id || "",
+      tenantId: tenantData?.id || "",
+      propertyAddress: propertyData?.address || "",
+      landlordName: landlordData?.name || "",
+      tenantName: tenantData?.name || "",
+      startDate: "",
+      endDate: "",
+      monthlyRent,
+      paymentDay: "1",
+      securityDeposit: "",
+      paymentMethod: "bank_transfer",
+      utilitiesIncluded: [],
+      utilitiesTenantPaid: [],
+      occupants: "",
+      noticeDays: "30",
+      additionalTerms: "",
+      leaseType: "fixed_term",
+    };
   };
 
   const {
@@ -84,15 +101,43 @@ export default function LeaseForm({
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(leaseSchema),
-    defaultValues,
+    defaultValues: getDefaultValues(),
   });
+
+  // Reset form when initialData changes (important for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      console.log('Resetting form with initialData:', initialData);
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
+  // Also update when propertyData changes (for create mode)
+  useEffect(() => {
+    if (mode === 'create' && propertyData?.price !== undefined && propertyData?.price !== null) {
+      console.log('Updating monthlyRent from propertyData.price:', propertyData.price);
+      setValue('monthlyRent', propertyData.price.toString());
+    }
+  }, [propertyData?.price, mode, setValue]);
 
   const selectedUtilities = watch('utilitiesIncluded') || [];
   const tenantUtilities = watch('utilitiesTenantPaid') || [];
   const formData = watch();
+
+  // Debug current form values
+  useEffect(() => {
+    const subscription = watch((value) => {
+      console.log('Form values changed:', {
+        monthlyRent: value.monthlyRent,
+        allValues: value
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   const utilityOptions = [
     { id: 'water', label: 'Water' },
@@ -104,6 +149,7 @@ export default function LeaseForm({
     { id: 'maintenance', label: 'Maintenance Fee' },
   ];
 
+  // The onSubmit function in LeaseForm.js - FIXED VERSION
   const onSubmit = async (data) => {
     setLoading(true);
 
@@ -112,16 +158,16 @@ export default function LeaseForm({
         title: `Lease for ${data.propertyAddress}`,
         description: data.additionalTerms || "",
 
-        landlord: landlordData?.id || user?._id, 
-        tenant: data.tenantId,                 
-        property: data.propertyId,                
+        landlord: landlordData?.id || user?._id,
+        tenant: data.tenantId,
+        property: data.propertyId,
 
         startDate: data.startDate,
         endDate: data.endDate,
 
         rentAmount: Number(data.monthlyRent),
         rentFrequency: "monthly",
-        securityDeposit: Number(data.securityDeposit),
+        securityDeposit: Number(data.securityDeposit), // ← This value is in the payload
 
         terms: {
           leaseType: data.leaseType,
@@ -139,8 +185,9 @@ export default function LeaseForm({
         createdBy: landlordData?.id || user?._id,
       };
 
+      console.log('Submitting payload:', payload);
 
-      // create
+      // CREATE MODE
       if (mode === "create") {
         const res = await leaseService.createLease(payload);
 
@@ -157,16 +204,33 @@ export default function LeaseForm({
         return;
       }
 
-      // edit/update (future)
+      // EDIT/UPDATE MODE - THIS WAS MISSING!
+      console.log('Updating lease with payload:', payload);
+      console.log('Lease ID:', initialData?.id || initialData?._id);
+
+      const leaseId = initialData?.id || initialData?._id;
+
+      if (!leaseId) {
+        throw new Error("Lease ID is missing - cannot update");
+      }
+
+      // ACTUALLY CALL THE UPDATE API
+      const res = await leaseService.updateLease(leaseId, payload);
+
+      console.log('Update response:', res);
+
       toast.success("Lease updated successfully!");
+
+      // Call onSuccess with the response data
+      onSuccess?.(res?.data || payload);
+
     } catch (err) {
-      console.error(err);
+      console.error('Submit error:', err);
       toast.error(err?.response?.data?.message || "Error saving lease");
     } finally {
       setLoading(false);
     }
   };
-
 
   const generatePDF = async () => {
     setLoading(true);
@@ -192,7 +256,6 @@ export default function LeaseForm({
 
   const sendForSignature = async () => {
     setSignatureMode(true);
-    // toast.success('Lease sent for signature! Tenant can now sign the agreement.');
   };
 
   const handleSignLease = async () => {
@@ -282,6 +345,9 @@ export default function LeaseForm({
           signatureMode={signatureMode}
           setPreviewMode={setPreviewMode}
           watch={watch}
+          mode={mode}
+          propertyData={propertyData}
+          initialData={initialData}
         />
       )}
     </div>
