@@ -46,7 +46,6 @@ export default function BlogDetailsPage() {
                 <BlogDetails blog={blog} />
 
                 {/* RIGHT SIDEBAR */}
-                {console.log(blog)}
                 <BlogSidebar
                     author={blog?.author?.name}
                     date={blog?.createdAt}

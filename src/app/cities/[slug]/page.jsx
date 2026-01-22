@@ -28,8 +28,6 @@ export default function CityPage({ params }) {
         );
 
         const data = await res.json();
-        console.log(data.data);
-        console.log(slug)
 
         if (data.success) {
           const filtered = data?.data?.filter(p => p.city.toLowerCase() === slug.replace("-", ' '))
