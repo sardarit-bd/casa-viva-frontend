@@ -6,7 +6,8 @@ import PostCard from "./components/PostCard"
 import CustomSelect from '@/components/dashboard/Admin/CustomSelect'
 
 const ITEMS_PER_PAGE = 6
-const CATEGORIES = ['All', 'Technology', 'Web Design', 'Accessibility', 'Backend', 'Database', 'Performance']
+
+const CATEGORIES = ['All', "real estate", "guide", "design"]
 const STATUS_OPTIONS = ['All', 'published', 'draft']
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },

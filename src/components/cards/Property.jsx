@@ -18,7 +18,7 @@ export default function PropertyCard({
 }) {
 
     const [isFavourite, setIsFavourite] = useState(false);
-    console.log(id)
+
 
     // Load favourite status from localStorage on component mount
     useEffect(() => {
@@ -119,7 +119,7 @@ export default function PropertyCard({
 
                 <div className="flex items-center gap-2">
                     <Square size={18} className="text-[#4B5563]" />
-                    <span>{sqft.toLocaleString()} sqft</span>
+                    <span>{sqft?.toLocaleString()} sqft</span>
                 </div>
             </div>
         </div>

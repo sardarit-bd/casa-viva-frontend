@@ -35,16 +35,9 @@ export default function PostForm({
 
   const categoryOptions = [
     { value: '', label: 'Select Category' },
-    { value: 'technology', label: 'Technology' },
-    { value: 'web-design', label: 'Web Design' },
-    { value: 'accessibility', label: 'Accessibility' },
-    { value: 'backend', label: 'Backend' },
-    { value: 'database', label: 'Database' },
-    { value: 'performance', label: 'Performance' },
-    { value: 'business', label: 'Business' },
-    { value: 'lifestyle', label: 'Lifestyle' },
-    { value: 'travel', label: 'Travel' },
-    { value: 'food', label: 'Food' }
+    { value: 'real estate', label: 'Real Estate' },
+    { value: 'guide', label: 'Guide' },
+    { value: 'design', label: 'Design' }
   ]
 
   const handleChange = (e) => {
