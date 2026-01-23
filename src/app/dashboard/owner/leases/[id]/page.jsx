@@ -1,7 +1,8 @@
-// frontend/src/app/dashboard/owner/leases/[id]/page.js
 "use client";
 
-import LeaseStatusBadge, { LeaseStatusTimeline } from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
+import LeaseStatusBadge, {
+  LeaseStatusTimeline,
+} from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
@@ -25,7 +26,7 @@ import {
   Eye,
   Check,
   XCircle,
-  PenSquare
+  PenSquare,
 } from "lucide-react";
 import { leaseService } from "@/services/lease.service";
 import SignatureView from "@/components/dashboard/Owner/leases/LeaseForm/SignatureView";
@@ -41,6 +42,16 @@ export default function LeaseDetailPage() {
   const [sendingToTenant, setSendingToTenant] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageText, setMessageText] = useState("");
+  const [signing, setSigning] = useState(false);
+
+  // Debug URL params
+  useEffect(() => {
+    console.log("Current URL params:", {
+      showSign,
+      searchParams: Object.fromEntries(searchParams.entries()),
+      leaseId: params.id,
+    });
+  }, [searchParams, params.id, showSign]);
 
   useEffect(() => {
     fetchLease();
@@ -51,30 +62,30 @@ export default function LeaseDetailPage() {
       setLoading(true);
       setError(null);
 
-      console.log('Fetching lease details for ID:', params.id);
+      console.log("Fetching lease details for ID:", params.id);
 
       const response = await leaseService.getLeaseById(params.id);
 
-      console.log('Lease details response:', {
+      console.log("Lease details response:", {
         success: response.success,
-        data: response.data
+        data: response.data,
       });
 
       if (response.success) {
         setLease(response.data);
       } else {
-        setError(response.message || 'Failed to fetch lease');
+        setError(response.message || "Failed to fetch lease");
       }
     } catch (err) {
-      console.error('Error fetching lease:', err);
-      setError(err.message || 'Failed to fetch lease details');
+      console.error("Error fetching lease:", err);
+      setError(err.message || "Failed to fetch lease details");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDownloadPDF = () => {
-    console.log('Downloading PDF for lease:', params.id);
+    console.log("Downloading PDF for lease:", params.id);
     // Implement PDF download logic
   };
 
@@ -82,16 +93,16 @@ export default function LeaseDetailPage() {
     try {
       setSendingToTenant(true);
       const response = await leaseService.sendToTenant(
-        params.id, 
-        "Please review and sign the lease agreement."
+        params.id,
+        "Please review and sign the lease agreement.",
       );
       if (response.success) {
-        alert('Lease sent to tenant successfully!');
+        alert("Lease sent to tenant successfully!");
         fetchLease(); // Refresh lease data
       }
     } catch (error) {
-      console.error('Error sending lease:', error);
-      alert(error.response?.data?.message || 'Failed to send lease');
+      console.error("Error sending lease:", error);
+      alert(error.response?.data?.message || "Failed to send lease");
     } finally {
       setSendingToTenant(false);
     }
@@ -101,11 +112,11 @@ export default function LeaseDetailPage() {
     try {
       const response = await leaseService.approveRequest(params.id);
       if (response.success) {
-        alert('Request approved! Lease draft created.');
+        alert("Request approved! Lease draft created.");
         fetchLease();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to approve request');
+      alert(error.response?.data?.message || "Failed to approve request");
     }
   };
 
@@ -115,18 +126,18 @@ export default function LeaseDetailPage() {
       try {
         const response = await leaseService.cancelLease(params.id, reason);
         if (response.success) {
-          alert('Lease cancelled successfully.');
+          alert("Lease cancelled successfully.");
           fetchLease();
         }
       } catch (error) {
-        alert(error.response?.data?.message || 'Failed to cancel lease');
+        alert(error.response?.data?.message || "Failed to cancel lease");
       }
     }
   };
 
   const handleSendMessage = async () => {
     if (!messageText.trim()) return;
-    
+
     try {
       // Implement message sending logic
       console.log("Sending message to tenant:", messageText);
@@ -139,13 +150,13 @@ export default function LeaseDetailPage() {
   };
 
   const handleBack = () => {
-    router.push('/dashboard/owner/leases');
+    router.push("/dashboard/owner/leases");
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount || 0);
   };
 
@@ -155,99 +166,124 @@ export default function LeaseDetailPage() {
         banner: {
           text: "New Request - Tenant has requested to rent this property",
           color: "bg-yellow-50 border-yellow-200",
-          icon: <AlertCircle className="h-5 w-5 text-yellow-600" />
+          icon: <AlertCircle className="h-5 w-5 text-yellow-600" />,
         },
         allowedActions: ["approve", "cancel", "message"],
-        disallowedActions: ["sign", "send"]
+        disallowedActions: ["sign", "send"],
       },
       draft: {
         banner: {
-          text: "Draft – not sent to tenant",
+          text: "Draft – ready for landlord signature",
           color: "bg-gray-50 border-gray-200",
-          icon: <FileQuestion className="h-5 w-5 text-gray-600" />
+          icon: <FileQuestion className="h-5 w-5 text-gray-600" />,
         },
-        allowedActions: ["edit", "save", "send", "sign", "message"],
-        disallowedActions: ["finalize"]
+        allowedActions: ["edit", "sign", "send", "message"],
+        disallowedActions: ["finalize"],
       },
       sent_to_tenant: {
         banner: {
-          text: "Waiting for tenant response",
+          text: "Waiting for tenant review",
           color: "bg-blue-50 border-blue-200",
-          icon: <Clock className="h-5 w-5 text-blue-600" />
+          icon: <Clock className="h-5 w-5 text-blue-600" />,
         },
         allowedActions: ["view", "message", "wait"],
-        disallowedActions: ["edit", "sign", "cancel"]
+        disallowedActions: ["edit", "sign", "cancel"],
       },
-      sent_to_landlord: {  // ✅ নতুন status যোগ করেছি
+      sent_to_landlord: {
         banner: {
-          text: "Action Required: Tenant has reviewed and sent the lease for your signature",
+          text: "Action Required: Tenant has sent the lease for your signature",
           color: "bg-blue-50 border-blue-200",
-          icon: <AlertCircle className="h-5 w-5 text-blue-600" />
+          icon: <AlertCircle className="h-5 w-5 text-blue-600" />,
         },
         allowedActions: ["sign", "view", "message"],
-        disallowedActions: ["edit", "request_changes"]
+        disallowedActions: ["edit", "request_changes"],
       },
       changes_requested: {
         banner: {
           text: "Tenant requested changes",
           color: "bg-orange-50 border-orange-200",
-          icon: <AlertCircle className="h-5 w-5 text-orange-600" />
+          icon: <AlertCircle className="h-5 w-5 text-orange-600" />,
         },
         allowedActions: ["edit", "save", "resend", "message"],
-        disallowedActions: ["sign", "ignore"]
+        disallowedActions: ["sign", "ignore"],
       },
       signed_by_landlord: {
         banner: {
-          text: "Signed by you – waiting for tenant",
+          text: "Signed by you – waiting for tenant signature",
           color: "bg-purple-50 border-purple-200",
-          icon: <CheckCircle className="h-5 w-5 text-purple-600" />
+          icon: <CheckCircle className="h-5 w-5 text-purple-600" />,
         },
         allowedActions: ["view", "download", "message"],
-        disallowedActions: ["edit", "sign"]
+        disallowedActions: ["edit", "sign"],
       },
       signed_by_tenant: {
         banner: {
-          text: "Tenant has signed - Action Required",
+          text: "Tenant has signed - Please sign to finalize",
           color: "bg-green-50 border-green-200",
-          icon: <AlertCircle className="h-5 w-5 text-green-600" />
+          icon: <AlertCircle className="h-5 w-5 text-green-600" />,
         },
         allowedActions: ["sign", "view", "message"],
-        disallowedActions: ["edit", "request_changes"]
+        disallowedActions: ["edit", "request_changes"],
       },
       fully_executed: {
         banner: {
           text: "Active Lease - Fully executed and legally active",
           color: "bg-green-50 border-green-200",
-          icon: <CheckCircle className="h-5 w-5 text-green-600" />
+          icon: <CheckCircle className="h-5 w-5 text-green-600" />,
         },
         allowedActions: ["view", "download"],
-        disallowedActions: ["edit", "sign", "request_changes"]
+        disallowedActions: ["edit", "sign", "request_changes"],
       },
       cancelled: {
         banner: {
           text: "Lease cancelled",
           color: "bg-red-50 border-red-200",
-          icon: <XCircle className="h-5 w-5 text-red-600" />
+          icon: <XCircle className="h-5 w-5 text-red-600" />,
         },
         allowedActions: ["view"],
-        disallowedActions: ["edit", "sign", "message", "download"]
+        disallowedActions: ["edit", "sign", "message", "download"],
       },
       expired: {
         banner: {
           text: "Lease term has ended",
           color: "bg-gray-50 border-gray-200",
-          icon: <Clock className="h-5 w-5 text-gray-600" />
+          icon: <Clock className="h-5 w-5 text-gray-600" />,
         },
         allowedActions: ["view", "download"],
-        disallowedActions: ["edit", "sign", "request_changes"]
-      }
+        disallowedActions: ["edit", "sign", "request_changes"],
+      },
     };
 
-    return config[status] || {
-      banner: null,
-      allowedActions: [],
-      disallowedActions: []
-    };
+    return (
+      config[status] || {
+        banner: null,
+        allowedActions: [],
+        disallowedActions: [],
+      }
+    );
+  };
+
+  const handleSignClick = () => {
+    console.log("Navigating to sign page with URL:", `/dashboard/owner/leases/${lease._id}?sign`);
+    router.push(`/dashboard/owner/leases/${lease._id}/sign`);
+  };
+
+  const handleSignLease = async (signatureData) => {
+    try {
+      setSigning(true);
+      const response = await leaseService.signLease(lease._id, signatureData);
+
+      if (response.success) {
+        alert("Lease signed successfully!");
+        router.replace(`/dashboard/owner/leases/${lease._id}`);
+        fetchLease();
+      }
+    } catch (err) {
+      console.error("Signing error:", err);
+      alert(err.response?.data?.message || "Failed to sign lease");
+    } finally {
+      setSigning(false);
+    }
   };
 
   if (loading) {
@@ -269,7 +305,9 @@ export default function LeaseDetailPage() {
             <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
               <span className="text-red-600 text-sm">!</span>
             </div>
-            <h3 className="text-lg font-semibold text-red-800">Error Loading Lease</h3>
+            <h3 className="text-lg font-semibold text-red-800">
+              Error Loading Lease
+            </h3>
           </div>
 
           <p className="text-red-600 mb-4">{error}</p>
@@ -298,7 +336,9 @@ export default function LeaseDetailPage() {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-[#004087]">Lease Not Found</h1>
-        <p className="text-gray-600 mt-2">The requested lease does not exist.</p>
+        <p className="text-gray-600 mt-2">
+          The requested lease does not exist.
+        </p>
         <button
           onClick={handleBack}
           className="mt-4 px-4 py-2 bg-[#004087] text-white rounded-lg"
@@ -315,7 +355,9 @@ export default function LeaseDetailPage() {
 
   const statusConfig = getStatusConfig(lease.status);
   const canEdit = statusConfig.allowedActions.includes("edit");
-  const canSend = statusConfig.allowedActions.includes("send") || statusConfig.allowedActions.includes("resend");
+  const canSend =
+    statusConfig.allowedActions.includes("send") ||
+    statusConfig.allowedActions.includes("resend");
   const canSign = statusConfig.allowedActions.includes("sign");
   const canApprove = statusConfig.allowedActions.includes("approve");
   const canMessage = statusConfig.allowedActions.includes("message");
@@ -324,7 +366,12 @@ export default function LeaseDetailPage() {
 
   // Check if lease is valid for sending
   const isLeaseValidForSending = () => {
-    return lease.startDate && lease.endDate && lease.rentAmount && lease.rentAmount > 0;
+    return (
+      lease.startDate &&
+      lease.endDate &&
+      lease.rentAmount &&
+      lease.rentAmount > 0
+    );
   };
 
   return (
@@ -341,8 +388,12 @@ export default function LeaseDetailPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#004087]">{lease.property?.title || 'Lease Agreement'}</h1>
-          <p className="text-gray-600">{lease.property?.address || 'Address not available'}</p>
+          <h1 className="text-2xl font-bold text-[#004087]">
+            {lease.property?.title || "Lease Agreement"}
+          </h1>
+          <p className="text-gray-600">
+            {lease.property?.address || "Address not available"}
+          </p>
         </div>
 
         <div className="flex gap-2 mt-4 md:mt-0">
@@ -369,7 +420,9 @@ export default function LeaseDetailPage() {
 
       {/* Status Banner */}
       {statusConfig.banner && (
-        <div className={`mb-6 rounded-xl border p-4 ${statusConfig.banner.color} flex items-start gap-3`}>
+        <div
+          className={`mb-6 rounded-xl border p-4 ${statusConfig.banner.color} flex items-start gap-3`}
+        >
           {statusConfig.banner.icon}
           <div>
             <p className="font-medium">{statusConfig.banner.text}</p>
@@ -380,7 +433,8 @@ export default function LeaseDetailPage() {
             )}
             {lease.status === "sent_to_landlord" && (
               <p className="text-sm text-gray-600 mt-1">
-                Tenant sent for your signature on {new Date(lease.updatedAt).toLocaleDateString()}
+                Tenant sent for your signature on{" "}
+                {new Date(lease.updatedAt).toLocaleDateString()}
               </p>
             )}
           </div>
@@ -402,7 +456,7 @@ export default function LeaseDetailPage() {
       <div className="mb-8">
         <div className="bg-white border rounded-xl p-6">
           <h2 className="text-lg font-semibold mb-4">Lease Actions</h2>
-          
+
           <div className="flex flex-wrap gap-3">
             {/* Approve Request Button */}
             {canApprove && (
@@ -418,7 +472,9 @@ export default function LeaseDetailPage() {
             {/* Edit Lease Button */}
             {canEdit && (
               <button
-                onClick={() => router.push(`/dashboard/owner/leases/${params.id}/edit`)}
+                onClick={() =>
+                  router.push(`/dashboard/owner/leases/${params.id}/edit`)
+                }
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
               >
                 <Edit className="h-5 w-5" />
@@ -429,18 +485,18 @@ export default function LeaseDetailPage() {
             {/* Sign Lease Button (Owner signs in draft) */}
             {canSign && lease.status === "draft" && !isSignedByLandlord && (
               <button
-                onClick={() => router.push(`/dashboard/owner/leases/${lease._id}?sign=true`)}
+                onClick={handleSignClick}
                 className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
               >
-                <CheckCircle className="h-5 w-5" />
-                Sign Lease
+                <PenSquare className="h-5 w-5" />
+                Sign Lease (Start Process)
               </button>
             )}
 
-            {/* Sign Lease Button (Owner signs after tenant sends for signature) */}
+            {/* Sign Lease Button (Owner signs when tenant sent for signature) */}
             {canSign && lease.status === "sent_to_landlord" && !isSignedByLandlord && (
               <button
-                onClick={() => router.push(`/dashboard/owner/leases/${lease._id}?sign=true`)}
+                onClick={handleSignClick}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
               >
                 <PenSquare className="h-5 w-5" />
@@ -451,7 +507,7 @@ export default function LeaseDetailPage() {
             {/* Sign Lease Button (Owner signs after tenant signed) */}
             {canSign && lease.status === "signed_by_tenant" && !isSignedByLandlord && (
               <button
-                onClick={() => router.push(`/dashboard/owner/leases/${lease._id}?sign=true`)}
+                onClick={handleSignClick}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
               >
                 <CheckCircle className="h-5 w-5" />
@@ -471,7 +527,9 @@ export default function LeaseDetailPage() {
                 ) : (
                   <Send className="h-5 w-5" />
                 )}
-                {lease.status === "changes_requested" ? "Re-send to Tenant" : "Send to Tenant"}
+                {lease.status === "changes_requested"
+                  ? "Re-send to Tenant"
+                  : "Send to Tenant"}
               </button>
             )}
 
@@ -503,7 +561,9 @@ export default function LeaseDetailPage() {
                 <ul className="text-sm text-yellow-700 mt-2 list-disc pl-4">
                   {!lease.startDate && <li>Start date is required</li>}
                   {!lease.endDate && <li>End date is required</li>}
-                  {(!lease.rentAmount || lease.rentAmount <= 0) && <li>Valid rent amount is required</li>}
+                  {(!lease.rentAmount || lease.rentAmount <= 0) && (
+                    <li>Valid rent amount is required</li>
+                  )}
                 </ul>
               </div>
             )}
@@ -515,9 +575,13 @@ export default function LeaseDetailPage() {
         {/* Left Column - Lease Details */}
         <div className="lg:col-span-2 space-y-8">
           {/* Basic Information */}
-          <div className={`bg-white rounded-xl shadow-sm border p-6 ${!canEdit ? 'opacity-95' : ''}`}>
+          <div
+            className={`bg-white rounded-xl shadow-sm border p-6 ${!canEdit ? "opacity-95" : ""}`}
+          >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-[#1F3A34]">Lease Details</h2>
+              <h2 className="text-xl font-semibold text-[#1F3A34]">
+                Lease Details
+              </h2>
               {!canEdit && (
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <Lock size={14} />
@@ -529,87 +593,140 @@ export default function LeaseDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-500">Property</label>
+                  <label className="block text-sm text-gray-500">
+                    Property
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <Home className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{lease.property?.title || 'N/A'}</span>
+                    <span className="font-medium">
+                      {lease.property?.title || "N/A"}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{lease.property?.address || 'Address not available'}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {lease.property?.address || "Address not available"}
+                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm text-gray-500">Tenant</label>
                   <div className="flex items-center gap-2 mt-1">
                     <User className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{lease.tenant?.name || 'N/A'}</span>
+                    <span className="font-medium">
+                      {lease.tenant?.name || "N/A"}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{lease.tenant?.email || 'Email not available'}</p>
-                  <p className="text-sm text-gray-600">{lease.tenant?.phone || ''}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {lease.tenant?.email || "Email not available"}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {lease.tenant?.phone || ""}
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-500">Landlord</label>
+                  <label className="block text-sm text-gray-500">
+                    Landlord
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <User className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{lease.landlord?.name || 'N/A'}</span>
+                    <span className="font-medium">
+                      {lease.landlord?.name || "N/A"}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{lease.landlord?.email || 'Email not available'}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {lease.landlord?.email || "Email not available"}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-500">Lease Term</label>
+                  <label className="block text-sm text-gray-500">
+                    Lease Term
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <Calendar className="h-4 w-4 text-gray-400" />
                     <span className="font-medium">
-                      {lease.startDate ? new Date(lease.startDate).toLocaleDateString() : 'Not set'} to {' '}
-                      {lease.endDate ? new Date(lease.endDate).toLocaleDateString() : 'Not set'}
+                      {lease.startDate
+                        ? new Date(lease.startDate).toLocaleDateString()
+                        : "Not set"}{" "}
+                      to{" "}
+                      {lease.endDate
+                        ? new Date(lease.endDate).toLocaleDateString()
+                        : "Not set"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-sm">
                     <Clock className="h-3 w-3 text-gray-400" />
                     <span className="text-gray-600">
-                      {lease.rentFrequency === 'monthly' ? 'Monthly Lease' : 'Other'}
+                      {lease.rentFrequency === "monthly"
+                        ? "Monthly Lease"
+                        : "Other"}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-500">Monthly Rent</label>
+                  <label className="block text-sm text-gray-500">
+                    Monthly Rent
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <DollarSign className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{formatCurrency(lease.rentAmount)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(lease.rentAmount)}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">Payment frequency: {lease.rentFrequency}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Payment frequency: {lease.rentFrequency}
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-500">Security Deposit</label>
+                  <label className="block text-sm text-gray-500">
+                    Security Deposit
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <DollarSign className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{formatCurrency(lease.securityDeposit)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(lease.securityDeposit)}
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-500">Signatures</label>
+                  <label className="block text-sm text-gray-500">
+                    Signatures
+                  </label>
                   <div className="space-y-2 mt-1">
                     <div className="flex items-center gap-2">
-                      <div className={`h-3 w-3 rounded-full ${isSignedByLandlord ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <span className="text-sm">Landlord: {isSignedByLandlord ? 'Signed' : 'Pending'}</span>
+                      <div
+                        className={`h-3 w-3 rounded-full ${isSignedByLandlord ? "bg-green-500" : "bg-gray-300"}`}
+                      ></div>
+                      <span className="text-sm">
+                        Landlord: {isSignedByLandlord ? "Signed" : "Pending"}
+                      </span>
                       {isSignedByLandlord && (
                         <span className="text-xs text-gray-500">
-                          on {new Date(lease.signatures.landlord.signedAt).toLocaleDateString()}
+                          on{" "}
+                          {new Date(
+                            lease.signatures.landlord.signedAt,
+                          ).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className={`h-3 w-3 rounded-full ${isSignedByTenant ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <span className="text-sm">Tenant: {isSignedByTenant ? 'Signed' : 'Pending'}</span>
+                      <div
+                        className={`h-3 w-3 rounded-full ${isSignedByTenant ? "bg-green-500" : "bg-gray-300"}`}
+                      ></div>
+                      <span className="text-sm">
+                        Tenant: {isSignedByTenant ? "Signed" : "Pending"}
+                      </span>
                       {isSignedByTenant && (
                         <span className="text-xs text-gray-500">
-                          on {new Date(lease.signatures.tenant.signedAt).toLocaleDateString()}
+                          on{" "}
+                          {new Date(
+                            lease.signatures.tenant.signedAt,
+                          ).toLocaleDateString()}
                         </span>
                       )}
                     </div>
@@ -622,8 +739,12 @@ export default function LeaseDetailPage() {
           {/* Description */}
           {lease.description && (
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-xl font-semibold text-[#1F3A34] mb-4">Description</h2>
-              <p className="text-gray-700 whitespace-pre-line">{lease.description}</p>
+              <h2 className="text-xl font-semibold text-[#1F3A34] mb-4">
+                Description
+              </h2>
+              <p className="text-gray-700 whitespace-pre-line">
+                {lease.description}
+              </p>
             </div>
           )}
 
@@ -638,27 +759,34 @@ export default function LeaseDetailPage() {
                 {lease.requestedChanges.map((req, index) => (
                   <div
                     key={index}
-                    className={`border rounded-lg p-4 ${req.resolved ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}
+                    className={`border rounded-lg p-4 ${req.resolved ? "bg-green-50 border-green-200" : "bg-yellow-50 border-yellow-200"}`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <p className="font-medium">Change Request #{index + 1}</p>
-                      <span className={`text-xs px-2 py-1 rounded ${req.resolved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {req.resolved ? 'Resolved' : 'Pending'}
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${req.resolved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
+                      >
+                        {req.resolved ? "Resolved" : "Pending"}
                       </span>
                     </div>
-                    
+
                     <p className="text-sm text-gray-800 whitespace-pre-line mb-3">
                       {req.changes}
                     </p>
 
                     <div className="text-xs text-gray-500">
-                      Requested on: {new Date(req.requestedAt).toLocaleDateString()}
+                      Requested on:{" "}
+                      {new Date(req.requestedAt).toLocaleDateString()}
                     </div>
 
                     {!req.resolved && canEdit && (
                       <div className="flex gap-2 mt-4">
                         <button
-                          onClick={() => router.push(`/dashboard/owner/leases/${lease._id}/edit`)}
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/owner/leases/${lease._id}/edit`,
+                            )
+                          }
                           className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
                           Edit Lease to Resolve
@@ -669,7 +797,10 @@ export default function LeaseDetailPage() {
                     {req.resolved && (
                       <div className="text-xs text-green-600 mt-3 flex items-center gap-1">
                         <CheckCircle size={12} />
-                        <span>Resolved on {new Date(req.resolvedAt).toLocaleDateString()}</span>
+                        <span>
+                          Resolved on{" "}
+                          {new Date(req.resolvedAt).toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -679,19 +810,26 @@ export default function LeaseDetailPage() {
           )}
 
           {/* Cancellation Details */}
-          {lease.status === "cancelled" && lease.messages?.find(m => m.message.includes("cancelled")) && (
-            <div className="bg-white border rounded-xl p-6">
-              <h2 className="text-lg font-semibold mb-4">Cancellation Details</h2>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700">
-                  {lease.messages.find(m => m.message.includes("cancelled"))?.message || "Lease was cancelled"}
-                </p>
-                <p className="text-sm text-red-600 mt-2">
-                  Cancelled on: {lease.updatedAt ? new Date(lease.updatedAt).toLocaleDateString() : "Unknown date"}
-                </p>
+          {lease.status === "cancelled" &&
+            lease.messages?.find((m) => m.message.includes("cancelled")) && (
+              <div className="bg-white border rounded-xl p-6">
+                <h2 className="text-lg font-semibold mb-4">
+                  Cancellation Details
+                </h2>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-700">
+                    {lease.messages.find((m) => m.message.includes("cancelled"))
+                      ?.message || "Lease was cancelled"}
+                  </p>
+                  <p className="text-sm text-red-600 mt-2">
+                    Cancelled on:{" "}
+                    {lease.updatedAt
+                      ? new Date(lease.updatedAt).toLocaleDateString()
+                      : "Unknown date"}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         {/* Right Column - Status Timeline & Actions */}
@@ -704,13 +842,15 @@ export default function LeaseDetailPage() {
             <h3 className="font-medium text-gray-900 mb-4">Quick Actions</h3>
             <div className="space-y-2">
               <button
-                onClick={() => router.push(`/dashboard/owner/leases/${params.id}`)}
+                onClick={() =>
+                  router.push(`/dashboard/owner/leases/${params.id}`)
+                }
                 className="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center gap-2"
               >
                 <Eye className="h-4 w-4" />
                 View Full Details
               </button>
-              
+
               {canDownload && (
                 <button
                   onClick={handleDownloadPDF}
@@ -720,7 +860,7 @@ export default function LeaseDetailPage() {
                   Download PDF
                 </button>
               )}
-              
+
               {canMessage && (
                 <button
                   onClick={() => setShowMessageModal(true)}
@@ -730,19 +870,23 @@ export default function LeaseDetailPage() {
                   Message Tenant
                 </button>
               )}
-              
+
               {canSign && !isSignedByLandlord && (
                 <button
-                  onClick={() => router.push(`/dashboard/owner/leases/${lease._id}?sign=true`)}
+                  onClick={handleSignClick}
                   className="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center gap-2"
                 >
                   <PenSquare className="h-4 w-4" />
                   Sign Lease Now
                 </button>
               )}
-              
+
               <button
-                onClick={() => router.push(`/dashboard/owner/properties/${lease.property?._id}`)}
+                onClick={() =>
+                  router.push(
+                    `/dashboard/owner/properties/${lease.property?._id}`,
+                  )
+                }
                 className="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center gap-2"
               >
                 <Home className="h-4 w-4" />
@@ -761,11 +905,19 @@ export default function LeaseDetailPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Created</span>
-                <span>{lease.createdAt ? new Date(lease.createdAt).toLocaleDateString() : 'N/A'}</span>
+                <span>
+                  {lease.createdAt
+                    ? new Date(lease.createdAt).toLocaleDateString()
+                    : "N/A"}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Updated</span>
-                <span>{lease.updatedAt ? new Date(lease.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                <span>
+                  {lease.updatedAt
+                    ? new Date(lease.updatedAt).toLocaleDateString()
+                    : "N/A"}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Status</span>
@@ -779,38 +931,6 @@ export default function LeaseDetailPage() {
               )}
             </div>
           </div>
-
-          {/* Signature Section */}
-          {showSign && canSign && (
-            <div className="mt-8 bg-white border rounded-xl p-6">
-              <h3 className="font-medium text-gray-900 mb-4">Sign Lease</h3>
-              <SignatureView
-                data={{
-                  propertyAddress: lease.property?.address,
-                  monthlyRent: lease.rentAmount,
-                  startDate: lease.startDate,
-                  endDate: lease.endDate,
-                  securityDeposit: lease.securityDeposit,
-                }}
-                onSign={async ({ signatureDataUrl, signatureMode, typedSignature }) => {
-                  try {
-                    await leaseService.signLease(lease._id, {
-                      signatureDataUrl,
-                      signatureMode,
-                      typedSignature,
-                    });
-
-                    alert("Lease signed successfully");
-                    router.replace(`/dashboard/owner/leases/${lease._id}`);
-                    fetchLease();
-                  } catch (err) {
-                    alert(err.response?.data?.message || "Failed to sign lease");
-                  }
-                }}
-                loading={false}
-              />
-            </div>
-          )}
         </div>
       </div>
 
@@ -852,6 +972,46 @@ export default function LeaseDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Signature Section */}
+      {/* {showSign && canSign && !isSignedByLandlord && (
+        <div className="mt-8 bg-white border rounded-xl p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-gray-900">Sign Lease</h3>
+            <button
+              onClick={() => router.replace(`/dashboard/owner/leases/${lease._id}`)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              Close
+            </button>
+          </div>
+          
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+            <p className="text-blue-800 font-medium">
+              Signing as: <span className="font-bold">Landlord</span>
+            </p>
+            <p className="text-sm text-blue-600 mt-1">
+              You are signing the lease agreement for{" "}
+              <span className="font-semibold">{lease.property?.title}</span>
+            </p>
+          </div>
+
+          <SignatureView
+            data={{
+              propertyAddress: lease.property?.address,
+              monthlyRent: lease.rentAmount,
+              startDate: lease.startDate,
+              endDate: lease.endDate,
+              securityDeposit: lease.securityDeposit,
+              tenantName: lease.tenant?.name,
+              landlordName: lease.landlord?.name,
+            }}
+            onSign={handleSignLease}
+            loading={signing}
+            role="landlord"
+          />
+        </div>
+      )} */}
     </div>
   );
 }

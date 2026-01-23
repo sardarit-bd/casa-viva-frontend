@@ -343,10 +343,6 @@ export default function TenantLeaseViewPage() {
 
           <div className="space-y-6">
 
-            {/* ===============================
-          CASE 1: Tenant can SIGN
-          (Landlord already signed)
-      =============================== */}
             {canTenantActuallySign && (
               <div className="space-y-4">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
