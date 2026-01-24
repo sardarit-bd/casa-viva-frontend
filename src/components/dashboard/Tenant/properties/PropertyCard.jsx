@@ -20,10 +20,13 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
         {/* Property Image */}
         <div className="relative h-48 overflow-hidden">
           <img
-            src={property.images[0]}
-            alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            src={
+              property.images?.[0] ||
+              "/placeholder-property.jpg"
+            }
+            alt={property.title || "Property"}
           />
+
           <div className="absolute top-3 left-3">
             <Badge
               variant={property.status === 'available' ? "default" : "secondary"}
@@ -103,40 +106,43 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
 
           {/* Amenities */}
           <div className="flex flex-wrap gap-1 mb-4">
-            {property.amenities.slice(0, 3).map((amenity, index) => (
+            {(property.amenities ?? []).slice(0, 3).map((amenity, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {amenity}
               </Badge>
             ))}
-            {property.amenities.length > 3 && (
+            {(property.amenities?.length ?? 0) > 3 && (
               <Badge variant="secondary" className="text-xs">
                 +{property.amenities.length - 3} more
               </Badge>
             )}
+
           </div>
 
           {/* Landlord Info */}
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-4">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={property.landlord.avatar} />
+                <AvatarImage src={property.landlord?.avatar || "/avatar-placeholder.png"} />
                 <AvatarFallback>
                   <Building className="h-4 w-4" />
                 </AvatarFallback>
-                {property.landlord.verified && (
+                {property.landlord?.verified && (
                   <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full flex items-center justify-center">
                     <CheckCircle className="h-2 w-2 text-white" />
                   </div>
                 )}
               </Avatar>
               <div>
-                <div className="text-sm font-medium">{property.landlord.name}</div>
+                <div className="text-sm font-medium">
+                  {property.landlord?.name || "Landlord"}
+                </div>
                 <div className="text-xs text-gray-500">Landlord</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs font-medium">{property.landlord.responseRate} response rate</div>
-              <div className="text-xs text-gray-500">{property.landlord.responseTime}</div>
+              <div className="text-xs font-medium">{property.landlord?.responseRate} response rate</div>
+              <div className="text-xs text-gray-500">{property.landlord?.responseTime}</div>
             </div>
           </div>
         </CardContent>
@@ -175,7 +181,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
                 <DialogHeader>
                   <DialogTitle>Contact Landlord</DialogTitle>
                   <DialogDescription>
-                    Send a message to {property.landlord.name} about {property.title}
+                    Send a message to {property.landlord?.name} about {property.title}
                   </DialogDescription>
                 </DialogHeader>
                 <ContactLandlordForm property={property} />

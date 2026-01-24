@@ -2,214 +2,231 @@
 
 import { useState, useEffect } from "react";
 import { toast } from 'react-hot-toast';
-import { Home, LayoutGrid, List } from "lucide-react";
+import { 
+  Home, FileText, Calendar, DollarSign, User, 
+  Clock, CheckCircle, AlertCircle, MapPin, 
+  Bed, Bath, Users, Eye, Download, 
+  MessageSquare, ChevronRight, MoreVertical,
+  Building, Lock, PenSquare
+} from "lucide-react";
 
 // Shadcn UI Components
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 // Icons
-import { Search, Eye, MessageSquare, Heart } from "lucide-react";
-import ContactLandlordForm from "@/components/dashboard/Tenant/properties/ContactLandlordForm";
-import PropertyDetailsDialog from "@/components/dashboard/Tenant/properties/PropertyDetailsDialog";
-import PropertyListRow from "@/components/dashboard/Tenant/properties/PropertyListRow";
-import PropertyCard from "@/components/dashboard/Tenant/properties/PropertyCard";
+import { Search } from "lucide-react";
+import { leaseService } from "@/services/lease.service";
+import { useRouter } from "next/navigation";
 
-export default function TenantPropertiesPage() {
-  const [properties, setProperties] = useState([]);
+export default function TenantLeasesPropertiesPage() {
+  const router = useRouter();
+  const [leases, setLeases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
-  const [favorites, setFavorites] = useState([]);
-  const [sortBy, setSortBy] = useState("recent");
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [selectedLease, setSelectedLease] = useState(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
-  // Fetch properties data for tenant
+  const FILTERS = [
+    { key: "all", label: "All Leases" },
+    { key: "active", label: "Active Leases" },
+    { key: "pending_request", label: "Pending Requests" },
+    { key: "sent_to_tenant", label: "Action Required" },
+    { key: "signed_by_landlord", label: "Awaiting Your Signature" },
+    { key: "fully_executed", label: "Fully Executed" },
+    { key: "cancelled", label: "Cancelled" },
+    { key: "expired", label: "Expired" }
+  ];
+
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
+    fetchLeases();
+  }, [filter]);
 
-        const mockProperties = [
-          {
-            id: "PR-001",
-            title: "Luxury Villa Punta Cana",
-            description: "5 bedroom luxury villa with private pool and ocean view. Perfect for family vacations or group getaways.",
-            location: "Punta Cana, Dominican Republic",
-            address: "123 Ocean Drive, Punta Cana",
-            price: 350,
-            currency: "USD",
-            period: "night",
-            bedrooms: 5,
-            bathrooms: 4,
-            guests: 10,
-            area: "3,500",
-            unit: "sq ft",
-            status: "available",
-            rating: 4.8,
-            reviews: 42,
-            amenities: ["Pool", "WiFi", "AC", "Parking", "Kitchen", "Beach Access", "Gym"],
-            images: [
-              "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop",
-              "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&auto=format&fit=crop",
-              "https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?w=800&auto=format&fit=crop"
-            ],
-            landlord: {
-              name: "John Smith",
-              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-              rating: 4.9,
-              verified: true,
-              responseRate: "95%",
-              responseTime: "Within 2 hours"
-            },
-            leaseType: "Monthly",
-            availableFrom: "2024-04-01",
-            minStay: 30,
-            maxStay: 365,
-            deposit: 700,
-            utilitiesIncluded: ["Water", "Electricity", "Internet"],
-            petsAllowed: true,
-            featured: true,
-            createdAt: "2024-01-15"
-          },
-          {
-            id: "PR-002",
-            title: "Beachfront Condo Bavaro",
-            description: "Modern 2-bedroom condo with direct beach access. Recently renovated with all modern amenities.",
-            location: "Bavaro, Dominican Republic",
-            address: "456 Beach Boulevard, Bavaro",
-            price: 220,
-            currency: "USD",
-            period: "night",
-            bedrooms: 2,
-            bathrooms: 2,
-            guests: 4,
-            area: "1,200",
-            unit: "sq ft",
-            status: "available",
-            rating: 4.5,
-            reviews: 28,
-            amenities: ["Beach Front", "WiFi", "AC", "Parking", "Kitchen", "Balcony", "TV"],
-            images: [
-              "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&auto=format&fit=crop",
-              "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop"
-            ],
-            landlord: {
-              name: "Maria Garcia",
-              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
-              rating: 4.7,
-              verified: true,
-              responseRate: "90%",
-              responseTime: "Within 4 hours"
-            },
-            leaseType: "Flexible",
-            availableFrom: "2024-03-20",
-            minStay: 7,
-            maxStay: 180,
-            deposit: 440,
-            utilitiesIncluded: ["Water", "Electricity"],
-            petsAllowed: false,
-            featured: false,
-            createdAt: "2024-02-20"
-          },
-          {
-            id: "PR-003",
-            title: "Golf Course Villa Cap Cana",
-            description: "Luxurious 6-bedroom villa on championship golf course with private chef service available.",
-            location: "Cap Cana, Dominican Republic",
-            address: "789 Golf View Road, Cap Cana",
-            price: 450,
-            currency: "USD",
-            period: "night",
-            bedrooms: 6,
-            bathrooms: 5,
-            guests: 12,
-            area: "4,500",
-            unit: "sq ft",
-            status: "occupied",
-            rating: 4.9,
-            reviews: 56,
-            amenities: ["Golf Course", "Pool", "WiFi", "AC", "Parking", "Kitchen", "Gym", "Spa", "Private Chef"],
-            images: [
-              "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop",
-              "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop"
-            ],
-            landlord: {
-              name: "Robert Johnson",
-              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Robert",
-              rating: 4.8,
-              verified: true,
-              responseRate: "98%",
-              responseTime: "Within 1 hour"
-            },
-            leaseType: "Annual",
-            availableFrom: "2024-06-01",
-            minStay: 90,
-            maxStay: 365,
-            deposit: 900,
-            utilitiesIncluded: ["Water", "Electricity", "Internet", "Cable"],
-            petsAllowed: true,
-            featured: true,
-            createdAt: "2024-01-05"
-          }
-        ];
+  const fetchLeases = async () => {
+    try {
+      setLoading(true);
+      const res = await leaseService.getMyLeases({
+        role: "tenant",
+        status: filter !== "all" ? filter : undefined,
+      });
 
-        setProperties(mockProperties);
-      } catch (error) {
-        toast.error("Failed to load properties");
-      } finally {
-        setLoading(false);
+      console.log("Tenant leases response:", res.data);
+
+      if (res.success) {
+
+        setLeases(res.data || []);
+      } else {
+        toast.error(res.message || "Failed to load leases");
       }
-    };
-
-    fetchProperties();
-  }, []);
-
-  // Filter properties based on search and filters
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch = searchQuery === "" ||
-      property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus = filter === "all" || property.status === filter;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Sort properties
-  const sortedProperties = [...filteredProperties].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low': return a.price - b.price;
-      case 'price-high': return b.price - a.price;
-      case 'rating': return b.rating - a.rating;
-      case 'beds': return b.bedrooms - a.bedrooms;
-      default: return new Date(b.createdAt) - new Date(a.createdAt);
-    }
-  });
-
-  // Toggle favorite
-  const toggleFavorite = (propertyId) => {
-    if (favorites.includes(propertyId)) {
-      setFavorites(favorites.filter(id => id !== propertyId));
-      toast.success("Removed from favorites");
-    } else {
-      setFavorites([...favorites, propertyId]);
-      toast.success("Added to favorites");
+    } catch (err) {
+      console.error("Error fetching leases:", err);
+      toast.error("Failed to load lease information");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle contact landlord
-  const handleContactLandlord = (property) => {
-    toast.success(`Contact request sent to ${property.landlord.name}`);
-    setContactDialogOpen(false);
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getStatusBadge = (status) => {
+    const config = {
+      pending_request: { label: "Pending Request", color: "bg-yellow-100 text-yellow-800" },
+      draft: { label: "Draft", color: "bg-gray-100 text-gray-800" },
+      sent_to_tenant: { label: "Action Required", color: "bg-blue-100 text-blue-800" },
+      sent_to_landlord: { label: "Sent to Landlord", color: "bg-purple-100 text-purple-800" },
+      changes_requested: { label: "Changes Requested", color: "bg-orange-100 text-orange-800" },
+      signed_by_landlord: { label: "Landlord Signed", color: "bg-green-100 text-green-800" },
+      signed_by_tenant: { label: "You Signed", color: "bg-green-100 text-green-800" },
+      fully_executed: { label: "Active Lease", color: "bg-green-100 text-green-800" },
+      cancelled: { label: "Cancelled", color: "bg-red-100 text-red-800" },
+      expired: { label: "Expired", color: "bg-gray-100 text-gray-800" }
+    };
+
+    const statusConfig = config[status] || { label: status, color: "bg-gray-100 text-gray-800" };
+    
+    return (
+      <Badge className={`${statusConfig.color} capitalize text-xs px-2 py-1`}>
+        {statusConfig.label}
+      </Badge>
+    );
+  };
+
+  const getNextAction = (lease) => {
+    if (lease.status === "sent_to_tenant") {
+      return { 
+        text: "Review & Respond", 
+        color: "text-blue-600", 
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200",
+        icon: AlertCircle 
+      };
+    }
+    if (lease.status === "signed_by_landlord") {
+      return { 
+        text: "Sign Lease Now", 
+        color: "text-green-600", 
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
+        icon: PenSquare 
+      };
+    }
+    if (lease.status === "changes_requested") {
+      return { 
+        text: "Waiting for Landlord", 
+        color: "text-orange-600", 
+        bgColor: "bg-orange-50",
+        borderColor: "border-orange-200",
+        icon: Clock 
+      };
+    }
+    return null;
+  };
+
+  const getPrimaryActionButton = (lease) => {
+    const nextAction = getNextAction(lease);
+    
+    if (lease.status === "sent_to_tenant" || lease.status === "signed_by_landlord") {
+      return (
+        <Button
+          size="sm"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={() => router.push(`/dashboard/tenant/leases/${lease._id}`)}
+        >
+          {lease.status === "signed_by_landlord" ? (
+            <PenSquare className="h-4 w-4 mr-2" />
+          ) : (
+            <Eye className="h-4 w-4 mr-2" />
+          )}
+          {nextAction?.text || "Take Action"}
+        </Button>
+      );
+    }
+    
+    return null;
+  };
+
+  // Helper function to render icon component
+  const renderIcon = (IconComponent) => {
+    if (!IconComponent) return null;
+    return <IconComponent className="h-4 w-4 mr-2" />;
+  };
+
+  const getSecondaryActions = (lease) => {
+    const actions = [];
+    
+    // Always show Details button
+    actions.push({
+      label: "View Details",
+      icon: Eye,
+      onClick: () => handleViewDetails(lease),
+      variant: "outline"
+    });
+
+    // Add specific actions based on status
+    if (lease.status === "fully_executed") {
+      actions.push({
+        label: "Download PDF",
+        icon: Download,
+        onClick: () => {
+          console.log("Download lease:", lease._id);
+          toast.success("Download started");
+        },
+        variant: "outline"
+      });
+    }
+
+    if (["sent_to_tenant", "signed_by_landlord", "changes_requested"].includes(lease.status)) {
+      actions.push({
+        label: "Message Landlord",
+        icon: MessageSquare,
+        onClick: () => {
+          // Message logic
+          toast.success("Message dialog will open");
+        },
+        variant: "outline"
+      });
+    }
+
+    return actions;
+  };
+
+  const filteredLeases = leases.filter(lease => {
+    if (!searchQuery) return true;
+    
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      lease.property?.title?.toLowerCase().includes(searchLower) ||
+      lease.property?.address?.toLowerCase().includes(searchLower) ||
+      lease.landlord?.name?.toLowerCase().includes(searchLower) ||
+      lease.status?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const handleViewDetails = (lease) => {
+    setSelectedLease(lease);
+    setDetailsDialogOpen(true);
   };
 
   if (loading) {
@@ -226,18 +243,75 @@ export default function TenantPropertiesPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-[#113B28]">
-            Available Properties
+            My Lease Agreements
           </h1>
           <CardDescription>
-            Browse and find your perfect rental property
+            Manage and track all your rental lease agreements
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="text-sm">
-            <span className="font-semibold text-[#113B28]">{sortedProperties.length}</span> properties found
+            <span className="font-semibold text-[#113B28]">{filteredLeases.length}</span> lease(s)
           </Badge>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Total Leases</p>
+                <p className="text-2xl font-bold">{leases.length}</p>
+              </div>
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Active Leases</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {leases.filter(l => l.status === "fully_executed").length}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Action Required</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {leases.filter(l => ["sent_to_tenant", "signed_by_landlord"].includes(l.status)).length}
+                </p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-blue-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Pending</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {leases.filter(l => ["pending_request", "changes_requested", "draft"].includes(l.status)).length}
+                </p>
+              </div>
+              <Clock className="h-8 w-8 text-yellow-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search and Filter */}
@@ -247,7 +321,7 @@ export default function TenantPropertiesPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search properties by title, location, or amenities..."
+                placeholder="Search leases by property, landlord, or status..."
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -256,167 +330,406 @@ export default function TenantPropertiesPage() {
 
             <div className="flex gap-2">
               <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value="available">Available Now</SelectItem>
-                  <SelectItem value="occupied">Occupied</SelectItem>
+                  {FILTERS.map((f) => (
+                    <SelectItem key={f.key} value={f.key}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Highest Rating</SelectItem>
-                  <SelectItem value="beds">Most Bedrooms</SelectItem>
-                </SelectContent>
-              </Select>
-
-
-
-              <div className="flex border rounded-md overflow-hidden">
-                {/* Grid View */}
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                  className="h-[35px] w-9 rounded-none"
-                >
-                  <LayoutGrid
-                    className={`h-4 w-4 ${viewMode === "grid" ? "text-white" : "text-gray-600"
-                      }`}
-                  />
-                </Button>
-
-                {/* List View */}
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                  className="h-[35px] w-9 rounded-none"
-                >
-                  <List
-                    className={`h-4 w-4 ${viewMode === "list" ? "text-white" : "text-gray-600"
-                      }`}
-                  />
-                </Button>
-              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Properties Grid/List */}
-      {viewMode === "grid" ? (
-        /* Grid View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedProperties.length === 0 ? (
-            <div className="col-span-3">
-              <Card className="p-12 text-center">
-                <Home className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <CardDescription className="mb-6 max-w-md mx-auto">
-                  {searchQuery ? `No properties match "${searchQuery}". Try different keywords.` : 'No properties available matching your filters.'}
-                </CardDescription>
-                <Button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilter('all');
-                    setSortBy('recent');
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </Card>
-            </div>
-          ) : (
-            sortedProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                isFavorite={favorites.includes(property.id)}
-                onToggleFavorite={toggleFavorite}
-                onViewDetails={() => {
-                  setSelectedProperty(property);
-                  setDetailsDialogOpen(true);
-                }}
-                onContact={() => {
-                  setSelectedProperty(property);
-                  setContactDialogOpen(true);
-                }}
-              />
-            ))
+      {/* Lease Cards Grid */}
+      {filteredLeases.length === 0 ? (
+        <Card className="p-12 text-center">
+          <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <CardDescription className="mb-6 max-w-md mx-auto">
+            {searchQuery ? `No leases match "${searchQuery}". Try different keywords.` : 'You don\'t have any lease agreements yet.'}
+          </CardDescription>
+          {!searchQuery && (
+            <Button 
+              onClick={() => router.push('/')}
+              className="bg-[#113B28] hover:bg-[#0e2f1f] text-white"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Browse Available Properties
+            </Button>
           )}
-        </div>
-      ) : (
-        /* List View */
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Property</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedProperties.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <Home className="h-12 w-12 text-gray-300 mb-4" />
-                        <p className="text-gray-500">No properties found</p>
-                        <p className="text-sm text-gray-400">
-                          Try adjusting your search or filter
-                        </p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  sortedProperties.map((property) => (
-                    <PropertyListRow
-                      key={property.id}
-                      property={property}
-                      isFavorite={favorites.includes(property.id)}
-                      onToggleFavorite={toggleFavorite}
-                      onContactLandlord={handleContactLandlord}
-                    />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredLeases.map((lease) => {
+            const nextAction = getNextAction(lease);
+            const primaryAction = getPrimaryActionButton(lease);
+            const secondaryActions = getSecondaryActions(lease);
+            const firstAction = secondaryActions[0];
+            
+            return (
+              <Card key={lease._id} className="overflow-hidden hover:shadow-lg transition-shadow border flex flex-col h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg mb-1 truncate">
+                        {lease.property?.title || "Lease Agreement"}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 truncate">
+                        <MapPin className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs truncate">{lease.property?.address || "Address not available"}</span>
+                      </CardDescription>
+                    </div>
+                    <div className="flex-shrink-0 ml-2">
+                      {getStatusBadge(lease.status)}
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="pb-3 flex-1">
+                  {/* Property Basic Info */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                      <span className="font-semibold text-sm">{formatCurrency(lease.rentAmount)}</span>
+                      <span className="text-xs text-gray-500 ml-1">/month</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                      <span className="text-sm">{formatDate(lease.startDate)}</span>
+                    </div>
+                  </div>
+
+                  {/* Landlord Info */}
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                      {lease.landlord?.profilePicture ? (
+                        <img 
+                          src={lease.landlord.profilePicture} 
+                          alt={lease.landlord.name}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <Building className="h-4 w-4 text-gray-600" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{lease.landlord?.name || "Landlord"}</p>
+                      <p className="text-xs text-gray-500 truncate">Property Owner</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  </div>
+
+                  {/* Next Action (if any) */}
+                  {nextAction && (
+                    <div className={`p-3 rounded-lg mb-4 ${nextAction.bgColor} border ${nextAction.borderColor}`}>
+                      <div className="flex items-center gap-2">
+                        {nextAction.icon && <nextAction.icon className={`h-4 w-4 ${nextAction.color}`} />}
+                        <p className={`text-sm font-medium ${nextAction.color}`}>{nextAction.text}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Info */}
+                  <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="p-2 bg-gray-50 rounded">
+                      <Bed className="h-4 w-4 text-gray-500 mx-auto mb-1" />
+                      <p className="text-xs font-medium">{lease.property?.bedrooms || "N/A"}</p>
+                      <p className="text-xs text-gray-500">Beds</p>
+                    </div>
+                    <div className="p-2 bg-gray-50 rounded">
+                      <Bath className="h-4 w-4 text-gray-500 mx-auto mb-1" />
+                      <p className="text-xs font-medium">{lease.property?.bathrooms || "N/A"}</p>
+                      <p className="text-xs text-gray-500">Baths</p>
+                    </div>
+                    {/* <div className="p-2 bg-gray-50 rounded">
+                      <Users className="h-4 w-4 text-gray-500 mx-auto mb-1" />
+                      <p className="text-xs font-medium">{lease.property?.maxOccupancy || "N/A"}</p>
+                      <p className="text-xs text-gray-500">Guests</p>
+                    </div> */}
+                  </div>
+                </CardContent>
+
+                <CardFooter className="pt-3 border-t mt-auto">
+                  <div className="w-full space-y-2">
+                    {/* Primary Action Button */}
+                    {primaryAction && primaryAction}
+                    
+                    {/* Secondary Actions */}
+                    <div className="flex gap-2">
+                      {secondaryActions.length === 1 ? (
+                        <Button
+                          variant={firstAction.variant || "outline"}
+                          size="sm"
+                          className="flex-1"
+                          onClick={firstAction.onClick}
+                        >
+                          {firstAction.icon === Eye && <Eye className="h-4 w-4 mr-2" />}
+                          {firstAction.icon === Download && <Download className="h-4 w-4 mr-2" />}
+                          {firstAction.icon === MessageSquare && <MessageSquare className="h-4 w-4 mr-2" />}
+                          {firstAction.label}
+                        </Button>
+                      ) : secondaryActions.length > 1 ? (
+                        <>
+                          <Button
+                            variant={firstAction.variant || "outline"}
+                            size="sm"
+                            className="flex-1"
+                            onClick={firstAction.onClick}
+                          >
+                            {firstAction.icon === Eye && <Eye className="h-4 w-4 mr-2" />}
+                            {firstAction.icon === Download && <Download className="h-4 w-4 mr-2" />}
+                            {firstAction.icon === MessageSquare && <MessageSquare className="h-4 w-4 mr-2" />}
+                            {firstAction.label}
+                          </Button>
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="px-3">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>More Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              {secondaryActions.slice(1).map((action, index) => (
+                                <DropdownMenuItem 
+                                  key={index}
+                                  onClick={action.onClick}
+                                  className="cursor-pointer"
+                                >
+                                  {action.icon === Eye && <Eye className="h-4 w-4 mr-2" />}
+                                  {action.icon === Download && <Download className="h-4 w-4 mr-2" />}
+                                  {action.icon === MessageSquare && <MessageSquare className="h-4 w-4 mr-2" />}
+                                  {action.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
-      {/* Property Details Dialog */}
-      {/* {selectedProperty && (
-        <PropertyDetailsDialog
-          property={selectedProperty}
-          open={detailsDialogOpen}
-          onOpenChange={setDetailsDialogOpen}
-        />
-      )} */}
+      {/* Lease Details Modal */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="w-[95vw] sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px] xl:max-w-[1200px] max-h-[90vh] overflow-y-auto p-4 md:p-6">
+          {selectedLease && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Lease Details
+                </DialogTitle>
+                <DialogDescription>
+                  Complete information about your lease agreement
+                </DialogDescription>
+              </DialogHeader>
 
-      {/* Contact Landlord Dialog */}
-      {/* {selectedProperty && (
-        <ContactLandlordForm
-          property={selectedProperty}
-          open={contactDialogOpen}
-          onOpenChange={setContactDialogOpen}
-          onSubmit={handleContactLandlord}
-        />
-      )} */}
+              <div className="space-y-6">
+                {/* Property Section */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">Property Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Property Name</p>
+                      <p className="font-medium">{selectedLease.property?.title || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="font-medium">{selectedLease.property?.address || "N/A"}</p>
+                      <p className="text-sm text-gray-500">
+                        {selectedLease.property?.city}, {selectedLease.property?.state} {selectedLease.property?.zipCode}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Property Type</p>
+                      <p className="font-medium capitalize">{selectedLease.property?.type || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Amenities</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedLease.property?.amenities?.slice(0, 3).map((amenity, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {amenity}
+                          </Badge>
+                        ))}
+                        {selectedLease.property?.amenities?.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{selectedLease.property.amenities.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lease Terms Section */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">Lease Terms</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Monthly Rent</p>
+                      <p className="font-medium text-lg">{formatCurrency(selectedLease.rentAmount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Security Deposit</p>
+                      <p className="font-medium">{formatCurrency(selectedLease.securityDeposit)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Lease Term</p>
+                      <p className="font-medium">
+                        {formatDate(selectedLease.startDate)} - {formatDate(selectedLease.endDate)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      {getStatusBadge(selectedLease.status)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Parties Section */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">Parties Involved</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2">Landlord</p>
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                          {selectedLease.landlord?.profilePicture ? (
+                            <img 
+                              src={selectedLease.landlord.profilePicture} 
+                              alt={selectedLease.landlord.name}
+                              className="h-12 w-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="h-6 w-6 text-gray-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium">{selectedLease.landlord?.name || "N/A"}</p>
+                          <p className="text-sm text-gray-500">{selectedLease.landlord?.email || "N/A"}</p>
+                          <p className="text-sm text-gray-500">{selectedLease.landlord?.phone || ""}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2">Tenant (You)</p>
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                          {selectedLease.tenant?.profilePicture ? (
+                            <img 
+                              src={selectedLease.tenant.profilePicture} 
+                              alt={selectedLease.tenant.name}
+                              className="h-12 w-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="h-6 w-6 text-gray-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium">{selectedLease.tenant?.name || "N/A"}</p>
+                          <p className="text-sm text-gray-500">{selectedLease.tenant?.email || "N/A"}</p>
+                          <p className="text-sm text-gray-500">{selectedLease.tenant?.phone || ""}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Signatures Section */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">Signatures</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2">Landlord Signature</p>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-3 w-3 rounded-full ${selectedLease.signatures?.landlord?.signedAt ? 'bg-green-500' : 'bg-gray-300'}`} />
+                        <span>
+                          {selectedLease.signatures?.landlord?.signedAt 
+                            ? `Signed on ${formatDate(selectedLease.signatures.landlord.signedAt)}`
+                            : "Awaiting signature"
+                          }
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2">Your Signature</p>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-3 w-3 rounded-full ${selectedLease.signatures?.tenant?.signedAt ? 'bg-green-500' : 'bg-gray-300'}`} />
+                        <span>
+                          {selectedLease.signatures?.tenant?.signedAt 
+                            ? `Signed on ${formatDate(selectedLease.signatures.tenant.signedAt)}`
+                            : "Not signed yet"
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions Section */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setDetailsDialogOpen(false);
+                      router.push(`/dashboard/tenant/leases/${selectedLease._id}`);
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Full Lease
+                  </Button>
+                  
+                  {(selectedLease.status === "sent_to_tenant" || selectedLease.status === "signed_by_landlord") && (
+                    <Button
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => {
+                        setDetailsDialogOpen(false);
+                        router.push(`/dashboard/tenant/leases/${selectedLease._id}`);
+                      }}
+                    >
+                      {selectedLease.status === "signed_by_landlord" ? (
+                        <PenSquare className="h-4 w-4 mr-2" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                      )}
+                      Take Action
+                    </Button>
+                  )}
+                  
+                  {selectedLease.status === "fully_executed" && (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        console.log("Download lease:", selectedLease._id);
+                        toast.success("Download started");
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
