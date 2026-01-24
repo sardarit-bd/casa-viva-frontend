@@ -161,6 +161,23 @@ export const leaseService = {
     }
   },
 
+  tenantReviewLease: async (leaseId, action, changes = "", message = "") => {
+    try {
+      console.log("Tenant reviewing lease:", { leaseId, action });
+      
+      const response = await api.post(`/leases/${leaseId}/review`, {
+        action,
+        changes,
+        message
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Error reviewing lease:", error);
+      throw error;
+    }
+  },
+
   // ================= MOVE-IN PHASE =================
   
   // Schedule move-in inspection

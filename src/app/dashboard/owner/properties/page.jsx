@@ -498,7 +498,7 @@ export default function PropertiesPage() {
         </div>
 
         {/* Stats Cards at Bottom */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-gradient-to-r from-[#004087] to-[#004ca3] rounded-xl p-6 text-white hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
@@ -542,7 +542,7 @@ export default function PropertiesPage() {
               <MapPin className="h-10 w-10 opacity-80" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
