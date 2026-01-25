@@ -98,6 +98,38 @@ export default function PropertyDetailsDialog({ property }) {
               ))}
             </div>
           </div>
+          {/* Availability Card */}
+          <Card className="border border-gray-200 shadow-sm">
+            <CardHeader className="pb-3 bg-gray-50">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                Availability
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-4">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                <div>
+                  <div className="text-sm text-gray-600">Available from</div>
+                  <div className="font-semibold">{formatDate(property.availableFrom)}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                <div>
+                  <div className="text-sm text-gray-600">Minimum stay</div>
+                  <div className="font-semibold">{property.minStay} days</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Tag className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                <div>
+                  <div className="text-sm text-gray-600">Lease type</div>
+                  <div className="font-semibold">{property.leaseType}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column - Cards */}
@@ -157,39 +189,6 @@ export default function PropertyDetailsDialog({ property }) {
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-[#113B28] mb-1">{property.area}</div>
                   <div className="text-sm text-gray-600">Area ({property.unit})</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Availability Card */}
-          <Card className="border border-gray-200 shadow-sm">
-            <CardHeader className="pb-3 bg-gray-50">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                Availability
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 pt-4">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-600">Available from</div>
-                  <div className="font-semibold">{formatDate(property.availableFrom)}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-600">Minimum stay</div>
-                  <div className="font-semibold">{property.minStay} days</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Tag className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-600">Lease type</div>
-                  <div className="font-semibold">{property.leaseType}</div>
                 </div>
               </div>
             </CardContent>

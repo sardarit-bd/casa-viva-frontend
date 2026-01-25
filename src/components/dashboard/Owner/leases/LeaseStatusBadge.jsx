@@ -17,6 +17,13 @@ import {
 } from 'lucide-react';
 
 const statusConfig = {
+  pending_request: {
+    label: 'Pending Approval',
+    icon: <Clock className="h-3 w-3" />,
+    color: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+    iconColor: 'text-yellow-600',
+    description: 'Waiting for landlord approval'
+  },
   // Draft Status
   draft: {
     label: 'Draft',
@@ -25,7 +32,7 @@ const statusConfig = {
     iconColor: 'text-gray-600',
     description: 'Lease is in draft mode'
   },
-  
+
   // Sent for Signature
   sent_to_tenant: {
     label: 'Sent for Signature',
@@ -41,7 +48,7 @@ const statusConfig = {
     iconColor: 'text-blue-600',
     description: 'Sent to landlord for signature'
   },
-  
+
   // Signature in Progress
   awaiting_signature: {
     label: 'Awaiting Signature',
@@ -57,7 +64,7 @@ const statusConfig = {
     iconColor: 'text-purple-600',
     description: 'Partially signed by parties'
   },
-  
+
   // Signed Status
   signed_by_tenant: {
     label: 'Tenant Signed',
@@ -80,7 +87,7 @@ const statusConfig = {
     iconColor: 'text-emerald-600',
     description: 'Fully signed and active'
   },
-  
+
   // Changes Requested
   changes_requested: {
     label: 'Changes Requested',
@@ -96,7 +103,7 @@ const statusConfig = {
     iconColor: 'text-amber-600',
     description: 'Currently under review'
   },
-  
+
   // Cancelled/Expired
   cancelled: {
     label: 'Cancelled',
@@ -119,7 +126,7 @@ const statusConfig = {
     iconColor: 'text-red-600',
     description: 'Lease was terminated early'
   },
-  
+
   // Renewal Status
   renewal_pending: {
     label: 'Renewal Pending',
@@ -135,7 +142,7 @@ const statusConfig = {
     iconColor: 'text-indigo-600',
     description: 'Renewal has been offered'
   },
-  
+
   // Default
   default: {
     label: 'Unknown',
@@ -165,21 +172,21 @@ const progressConfig = {
   }
 };
 
-export default function LeaseStatusBadge({ 
-  status, 
+export default function LeaseStatusBadge({
+  status,
   showProgress = false,
   size = 'md',
-  className = '' 
+  className = ''
 }) {
   const config = statusConfig[status] || statusConfig.default;
   const progress = progressConfig[status];
-  
+
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-1.5 text-sm',
     lg: 'px-4 py-2 text-base'
   };
-  
+
   return (
     <div className={`inline-flex flex-col gap-1 ${className}`}>
       {/* Main Badge */}
@@ -189,7 +196,7 @@ export default function LeaseStatusBadge({
         </span>
         <span className="font-medium">{config.label}</span>
       </div>
-      
+
       {/* Progress Bar (if enabled and available) */}
       {showProgress && progress && (
         <div className="mt-1">
@@ -202,22 +209,22 @@ export default function LeaseStatusBadge({
               </div>
             ))}
           </div>
-          
+
           {/* Progress Bar */}
           <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-green-500 transition-all duration-300"
               style={{ width: `${(progress.progress / progress.total) * 100}%` }}
             />
           </div>
-          
+
           {/* Progress Text */}
           <div className="text-xs text-gray-500 text-center mt-1">
             Step {progress.progress} of {progress.total}
           </div>
         </div>
       )}
-      
+
       {/* Status Description Tooltip (on hover) */}
       <div className="relative group">
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
@@ -239,16 +246,16 @@ export function LeaseStatusTimeline({ lease, className = '' }) {
     { status: 'signed_by_tenant', date: '2024-01-17', user: 'Tenant' },
     { status: 'fully_executed', date: '2024-01-18', user: 'System' },
   ];
-  
+
   return (
     <div className={`bg-white rounded-lg border p-4 ${className}`}>
       <h3 className="font-medium text-gray-900 mb-4">Lease Status Timeline</h3>
-      
+
       <div className="space-y-4">
         {statusHistory.map((item, index) => {
           const config = statusConfig[item.status] || statusConfig.default;
           const isLast = index === statusHistory.length - 1;
-          
+
           return (
             <div key={index} className="flex items-start">
               {/* Timeline line */}
@@ -260,7 +267,7 @@ export function LeaseStatusTimeline({ lease, className = '' }) {
                   <div className="w-0.5 h-8 bg-gray-300 mt-1" />
                 )}
               </div>
-              
+
               {/* Timeline content */}
               <div className="flex-1">
                 <div className="flex justify-between items-start">
@@ -294,32 +301,30 @@ export function LeaseStatusFilter({ selectedStatus, onStatusChange, className = 
     'cancelled',
     'expired'
   ];
-  
+
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <button
         onClick={() => onStatusChange('all')}
-        className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-          selectedStatus === 'all'
+        className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${selectedStatus === 'all'
             ? 'bg-[#1F3A34] text-white border-[#1F3A34]'
             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-        }`}
+          }`}
       >
         All Statuses
       </button>
-      
+
       {mainStatuses.map(status => {
         const config = statusConfig[status] || statusConfig.default;
-        
+
         return (
           <button
             key={status}
             onClick={() => onStatusChange(status)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-colors ${
-              selectedStatus === status
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-colors ${selectedStatus === status
                 ? `${config.color.replace('50', '100').replace('border-', 'border-').split(' ')[0]} border-current`
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
+              }`}
           >
             <span className={config.iconColor}>
               {config.icon}

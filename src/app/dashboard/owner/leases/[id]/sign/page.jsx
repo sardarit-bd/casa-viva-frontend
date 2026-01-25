@@ -6,7 +6,7 @@ import SignatureView from "@/components/dashboard/Owner/leases/LeaseForm/Signatu
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { leaseService } from "@/services/lease.service";
 
-export default function TenantSignLeasePage() {
+export default function OwnerSignLeasePage() {
   const { id } = useParams();
   const router = useRouter();
 
@@ -48,7 +48,7 @@ export default function TenantSignLeasePage() {
       });
 
       alert("Lease signed successfully");
-      router.push(`/dashboard/tenant/leases/${id}`);
+      router.push(`/dashboard/owner/leases/${id}`);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to sign lease");
     }
