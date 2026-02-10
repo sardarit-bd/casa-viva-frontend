@@ -273,11 +273,11 @@ export default function PropertyDetails({ property, user }) {
 
             <div className="map">
                 <HospitalSchoolFinder
-            address={address}
-            apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-            mapHeight="600px"
-            radius={3000}
-          />
+                    address={address}
+                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                    mapHeight="600px"
+                    radius={3000}
+                />
 
             </div>
 
@@ -290,7 +290,7 @@ export default function PropertyDetails({ property, user }) {
                         alt="Agent"
                         width={90}
                         height={90}
-                        className="rounded-full object-cover shadow"
+                        className="rounded-full object-cover shadow w-[90px] h-[90px]"
                     />
 
                     <div>
