@@ -5,6 +5,228 @@ import { useRouter } from "next/navigation";
 import { FileText, Download, PenTool, LayoutGrid, List } from "lucide-react";
 import LeaseStatusBadge from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
 import { leaseService } from "@/services/lease.service";
+import jsPDF from "jspdf";
+
+const convertWebPToDataURL = (webpDataUrl, background = "transparent") => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = webpDataUrl;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+
+      // Fill background if requested
+      if (background === "white") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Draw the image
+      ctx.drawImage(img, 0, 0);
+
+      // Get PNG Data URL (jsPDF prefers PNG)
+      const pngDataUrl = canvas.toDataURL("image/png");
+      resolve(pngDataUrl);
+    };
+  });
+};
+
+
+export const handleDownload = async (id) => {
+  try {
+    const response = await leaseService.getLeaseById(id);
+    const lease = response.data;
+
+    const doc = new jsPDF();
+    let y = 20;
+
+    const property = lease.property || {};
+    const landlord = lease.landlord || {};
+    const tenant = lease.tenant || {};
+    const utilities = lease.utilities || {};
+    const terms = lease.terms || {};
+
+    // ===== Title =====
+    doc.setFontSize(18);
+    doc.setFont(undefined, "bold");
+    doc.text("RESIDENTIAL LEASE AGREEMENT", 105, y, { align: "center" });
+
+    y += 12;
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, "normal");
+
+    // ===== Intro Paragraph =====
+    doc.text(
+      `This Lease Agreement is made between ${landlord.name || "Landlord"} ` +
+        `("Landlord") and ${tenant.name || "Tenant"} ("Tenant") for the rental of the property described below.`,
+      14,
+      y,
+      { maxWidth: 180 }
+    );
+
+    y += 14;
+
+    // ===== Property Details =====
+    doc.setFont(undefined, "bold");
+    doc.text("1. Property Details", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    const propertyDetails = [
+      `Title: ${property.title || ""}`,
+      `Address: ${property.address || ""}, ${property.city || ""}, ${property.state || ""} ${property.zipCode || ""}`,
+      `Type: ${property.type || ""}`,
+      `Bedrooms: ${property.bedrooms || ""}   Bathrooms: ${property.bathrooms || ""}`,
+      `Rent: $${property.price || ""} (${lease.rentFrequency || ""})`,
+    ];
+
+    doc.text(propertyDetails, 14, y);
+    y += propertyDetails.length * 6 + 4;
+
+    // ===== Lease Term =====
+    doc.setFont(undefined, "bold");
+    doc.text("2. Lease Term", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    const startDate = new Date(lease.startDate).toLocaleDateString();
+    const endDate = new Date(lease.endDate).toLocaleDateString();
+
+    doc.text(
+      `Start Date: ${startDate}    End Date: ${endDate}    Type: ${
+        terms.leaseType || ""
+      }`,
+      14,
+      y
+    );
+
+    y += 10;
+
+    // ===== Utilities =====
+    doc.setFont(undefined, "bold");
+    doc.text("3. Utilities", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    doc.text(
+      `Included in Rent: ${(utilities.includedInRent || []).join(", ")}`,
+      14,
+      y,
+      { maxWidth: 180 }
+    );
+    y += 6;
+
+    doc.text(
+      `Paid by Tenant: ${(utilities.paidByTenant || []).join(", ")}`,
+      14,
+      y,
+      { maxWidth: 180 }
+    );
+
+    y += 10;
+
+    // ===== Terms =====
+    doc.setFont(undefined, "bold");
+    doc.text("4. Terms & Conditions", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    const termsText = [
+      `Furnished: ${terms.furnished ? "Yes" : "No"}`,
+      `Notice Period: ${terms.noticeDays || 0} days`,
+      `Payment Day: ${terms.paymentDay || ""}`,
+      `Payment Method: ${terms.paymentMethod || ""}`,
+      `Maximum Occupants: ${terms.occupants || "N/A"}`,
+    ];
+
+    doc.text(termsText, 14, y);
+    y += termsText.length * 6 + 4;
+
+    // ===== Parties =====
+    doc.setFont(undefined, "bold");
+    doc.text("5. Parties", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    const partyText = [
+      `Landlord: ${landlord.name || ""} | ${landlord.email || ""} | ${
+        landlord.phone || ""
+      }`,
+      `Tenant: ${tenant.name || ""} | ${tenant.email || ""} | ${
+        tenant.phone || ""
+      }`,
+    ];
+
+    doc.text(partyText, 14, y, { maxWidth: 180 });
+    y += 14;
+
+    // ===== Agreement Clause =====
+    doc.setFont(undefined, "bold");
+    doc.text("Agreement", 14, y);
+    y += 7;
+
+    doc.setFont(undefined, "normal");
+
+    doc.text(
+      "Both parties agree to abide by the terms and conditions stated in this lease agreement. This document serves as a legally binding contract.",
+      14,
+      y,
+      { maxWidth: 180 }
+    );
+
+    y += 20;
+
+    // ===== Signatures =====
+    doc.setFont(undefined, "bold");
+    doc.text("Signatures", 14, y);
+    y += 10;
+
+    const sigWidth = 60;
+    const sigHeight = 30;
+
+    // Landlord signature
+    if (lease.signatures?.landlord?.signatureData?.dataUrl) {
+      doc.text("Landlord:", 14, y);
+      doc.addImage(
+        lease.signatures.landlord.signatureData.dataUrl,
+        "Webp",
+        14,
+        y + 2,
+        sigWidth,
+        sigHeight,
+        
+      );
+      doc.text(landlord.name || "", 14, y + sigHeight + 8);
+    }
+
+    // Tenant signature
+    if (lease.signatures?.tenant?.signatureData?.dataUrl) {
+      doc.text("Tenant:", 120, y);
+      doc.addImage(
+        lease.signatures.tenant.signatureData.dataUrl,
+        "PNG",
+        120,
+        y + 2,
+        sigWidth,
+        sigHeight
+      );
+      doc.text(tenant.name || "", 120, y + sigHeight + 8);
+    }
+
+    // ===== Save =====
+    doc.save(`Lease_Agreement_${id}.pdf`);
+  } catch (err) {
+    console.error("Error downloading lease:", err);
+  }
+};
 
 export default function TenantLeasesPage() {
   const router = useRouter();
@@ -20,7 +242,7 @@ export default function TenantLeasesPage() {
   const fetchLeases = async () => {
     try {
       setLoading(true);
-      const response = await leaseService.getMyLeases();
+      const response = await leaseService.getAllLeases();
       console.log(response.data)
       if (response.success) {
         setLeases(response.data);
@@ -33,23 +255,6 @@ export default function TenantLeasesPage() {
     }
   };
 
-  const handleView = (id) => {
-    router.push(`/dashboard/tenant/leases/${id}`);
-  };
-
-  const handleSign = (id) => {
-    router.push(`/dashboard/tenant/leases/${id}/sign`);
-  };
-
-  const handleDownload = async (id) => {
-    try {
-      // Implement PDF download functionality
-      console.log("Download lease PDF:", id);
-      // You can add actual PDF generation/download logic here
-    } catch (err) {
-      console.error('Error downloading lease:', err);
-    }
-  };
 
   if (loading) {
     return (
@@ -155,12 +360,12 @@ export default function TenantLeasesPage() {
 
                   <td className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button
+                      {/* <button
                         onClick={() => handleView(lease._id)}
                         className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50"
                       >
                         View
-                      </button>
+                      </button> */}
 
                       {/* {lease.status === "sent_to_tenant" && (
                         <button
@@ -175,7 +380,7 @@ export default function TenantLeasesPage() {
                       {lease.status === "fully_executed" && (
                         <button
                           onClick={() => handleDownload(lease._id)}
-                          className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                          className="px-3 py-2 text-sm bg-[#004087] text-white rounded-lg flex items-center gap-1"
                         >
                           <Download className="w-4 h-4" />
                           PDF

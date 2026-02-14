@@ -157,10 +157,6 @@ export default function TransactionsPage() {
                 ID <ArrowUpDown size={14} className="inline-block ml-1" />
               </th>
 
-              <th className="py-3 px-4 cursor-pointer" onClick={() => toggleSort("user")}>
-                User <ArrowUpDown size={14} className="inline-block ml-1" />
-              </th>
-
               <th
                 className="py-3 px-4 cursor-pointer"
                 onClick={() => toggleSort("amount")}
@@ -184,8 +180,7 @@ export default function TransactionsPage() {
           <tbody>
             {filteredData.map((t, index) => (
               <tr key={index} className="border-t hover:bg-[#F8F8F8] transition">
-                <td className="py-3 px-4 font-medium text-[#05314A]">{index + 1}</td>
-                <td className="py-3 px-4">{t.user?.name || 'N/A'}</td>
+                <td className="py-3 px-4 font-medium text-[#05314A]">{t?.paymentIntentId || 'N/A'}</td>
                 <td className="py-3 px-4">${t.amount.toFixed(2)}</td>
                 <td className="py-3 px-4">{t.paymentType}</td>
                 <td className="py-3 px-4">{new Date(t.createdAt).toLocaleString()}</td>

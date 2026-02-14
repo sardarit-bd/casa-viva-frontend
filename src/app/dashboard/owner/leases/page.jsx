@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { leaseService } from "@/services/lease.service";
 import toast from "react-hot-toast";
+import { handleDownload } from "../../admin/leases/page";
 
 // Enhanced filters with counts
 const ENHANCED_FILTERS = [
@@ -288,13 +289,7 @@ export default function OwnerLeasesPage() {
 
   const handleDownloadPDF = async (leaseId) => {
     try {
-      // This would call your PDF generation endpoint
-      toast.loading('Generating PDF...');
-      // Implement actual PDF download
-      setTimeout(() => {
-        toast.dismiss();
-        toast.success('PDF generated successfully!');
-      }, 1500);
+      handleDownload(leaseId)
     } catch (error) {
       toast.error('Failed to generate PDF');
     }

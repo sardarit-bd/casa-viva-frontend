@@ -253,6 +253,8 @@ export default function SignatureView({ data, onSign, loading }) {
 
   const handleSubmitSign = () => {
     const signatureDataUrl = getSignatureDataUrl();
+    // console.log(signatureDataUrl)
+    // return
     onSign?.({
       signatureDataUrl,
       signatureMode: sigMode,
@@ -263,7 +265,7 @@ export default function SignatureView({ data, onSign, loading }) {
   return (
     <div className="bg-white rounded-xl shadow-lg border p-8">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-[#1F3A34]">
+        <h1 className="text-2xl font-bold text-[#004087]">
           LEASE AGREEMENT - E-SIGNATURE
         </h1>
         <p className="text-gray-600 mt-2">
@@ -338,7 +340,7 @@ export default function SignatureView({ data, onSign, loading }) {
                 onClick={() => setSigMode("draw")}
                 className={`px-3 py-2 rounded-lg text-sm border ${
                   sigMode === "draw"
-                    ? "bg-[#1F3A34] text-white border-[#1F3A34]"
+                    ? "bg-[#004087] text-white border-[#004087]"
                     : "hover:bg-gray-50"
                 }`}
               >
@@ -349,7 +351,7 @@ export default function SignatureView({ data, onSign, loading }) {
                 onClick={() => setSigMode("type")}
                 className={`px-3 py-2 rounded-lg text-sm border ${
                   sigMode === "type"
-                    ? "bg-[#1F3A34] text-white border-[#1F3A34]"
+                    ? "bg-[#004087] text-white border-[#004087]"
                     : "hover:bg-gray-50"
                 }`}
               >
@@ -358,7 +360,7 @@ export default function SignatureView({ data, onSign, loading }) {
               <label
                 className={`px-3 py-2 rounded-lg text-sm border cursor-pointer flex items-center gap-2 ${
                   sigMode === "upload"
-                    ? "bg-[#1F3A34] text-white border-[#1F3A34]"
+                    ? "bg-[#004087] text-white border-[#004087]"
                     : "hover:bg-gray-50"
                 }`}
               >
@@ -387,6 +389,7 @@ export default function SignatureView({ data, onSign, loading }) {
           {/* DRAW */}
           {sigMode === "draw" && (
             <>
+            {console.log("ok")}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-2">
                 <div className="w-full h-48">
                   <canvas
@@ -481,7 +484,7 @@ export default function SignatureView({ data, onSign, loading }) {
           <button
             onClick={handleSubmitSign}
             disabled={!canSign}
-            className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-8 py-3 bg-[#004087] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL+"/api" || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/api" || "http://localhost:5000/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -47,17 +47,17 @@ api.interceptors.response.use(
 
 export const leaseService = {
   // ================= APPLICATION PHASE =================
-  
+
   // Apply for property
   applyForProperty: async (propertyId, message = "") => {
     try {
       console.log("Applying for property:", propertyId);
-      
+
       const response = await api.post("/leases", {
         property: propertyId,
         message: message
       });
-      
+
       console.log("Application response:", response.data);
       return response.data;
     } catch (error) {
@@ -70,13 +70,13 @@ export const leaseService = {
   reviewApplication: async (leaseId, action, reason = "", screeningResults = {}) => {
     try {
       console.log("Reviewing application:", { leaseId, action });
-      
+
       const response = await api.post(`/leases/${leaseId}/review-application`, {
         action, // "approve" or "reject"
         reason,
         screeningResults
       });
-      
+
       return response.data;
     } catch (error) {
       console.error("Error reviewing application:", error);
@@ -85,14 +85,14 @@ export const leaseService = {
   },
 
   // ================= DRAFT PHASE =================
-   createLease: (payload) =>
-    api.post("/leases", {...payload, status: "draft"}),
-  
+  createLease: (payload) =>
+    api.post("/leases", { ...payload, status: "draft" }),
+
   // Create/update lease draft
   createOrUpdateDraft: async (leaseId, updates) => {
     try {
       console.log("Updating lease draft:", { leaseId, updates });
-      
+
       const response = await api.put(`/leases/${leaseId}/draft`, updates);
       return response.data;
     } catch (error) {
@@ -105,7 +105,7 @@ export const leaseService = {
   sendToTenant: async (leaseId, message = "") => {
     try {
       console.log("Sending lease to tenant:", { leaseId, message });
-      
+
       const response = await api.post(`/leases/${leaseId}/send-to-tenant`, { message });
       return response.data;
     } catch (error) {
@@ -115,18 +115,18 @@ export const leaseService = {
   },
 
   // ================= REVIEW PHASE =================
-  
+
   // Tenant reviews lease
   reviewLease: async (leaseId, action, changes = "", message = "") => {
     try {
       console.log("Tenant reviewing lease:", { leaseId, action });
-      
+
       const response = await api.post(`/leases/${leaseId}/review`, {
         action, // "approve" or "request_changes"
         changes,
         message
       });
-      
+
       return response.data;
     } catch (error) {
       console.error("Error reviewing lease:", error);
@@ -141,7 +141,7 @@ export const leaseService = {
   },
 
   // ================= SIGNING PHASE =================
-  
+
   // Sign lease
   signLease: async (leaseId, payload) => {
     const response = await api.post(`/leases/${leaseId}/sign`, {
@@ -166,13 +166,13 @@ export const leaseService = {
   tenantReviewLease: async (leaseId, action, changes = "", message = "") => {
     try {
       console.log("Tenant reviewing lease:", { leaseId, action });
-      
+
       const response = await api.post(`/leases/${leaseId}/review`, {
         action,
         changes,
         message
       });
-      
+
       return response.data;
     } catch (error) {
       console.error("Error reviewing lease:", error);
@@ -181,7 +181,7 @@ export const leaseService = {
   },
 
   // ================= MOVE-IN PHASE =================
-  
+
   // Schedule move-in inspection
   scheduleMoveInInspection: async (leaseId, scheduledAt, notes = "") => {
     try {
@@ -208,7 +208,7 @@ export const leaseService = {
   },
 
   // ================= ACTIVE LEASE MANAGEMENT =================
-  
+
   // Give notice
   giveNotice: async (leaseId, type, effectiveDate, reason = "", document = "") => {
     try {
@@ -241,7 +241,7 @@ export const leaseService = {
   },
 
   // ================= MOVE-OUT PHASE =================
-  
+
   // Schedule move-out inspection
   scheduleMoveOutInspection: async (leaseId, scheduledAt) => {
     try {
@@ -269,20 +269,40 @@ export const leaseService = {
   },
 
   // ================= GENERAL LEASE MANAGEMENT =================
-  
+
   // Get all leases for current user
   getMyLeases: async (options = {}) => {
     try {
       const { role = null, status = null, type = null } = options;
-      
+
       const params = new URLSearchParams();
       if (role) params.append("role", role);
       if (status && status !== "all") params.append("status", status);
       if (type) params.append("type", type);
-      
+
       const url = `/leases/my-leases${params.toString() ? `?${params.toString()}` : ""}`;
       console.log("Fetching leases:", url);
-      
+
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting leases:", error);
+      throw error;
+    }
+  },
+
+  getAllLeases: async (options = {}) => {
+    try {
+      const { role = null, status = null, type = null } = options;
+
+      const params = new URLSearchParams();
+      if (role) params.append("role", role);
+      if (status && status !== "all") params.append("status", status);
+      if (type) params.append("type", type);
+
+      const url = `/leases/${params.toString() ? `?${params.toString()}` : ""}`;
+      console.log("Fetching leases:", url);
+
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -295,7 +315,7 @@ export const leaseService = {
   getLeaseById: async (leaseId) => {
     try {
       console.log("Fetching lease by ID:", leaseId);
-      
+
       const response = await api.get(`/leases/${leaseId}`);
       return response.data;
     } catch (error) {
@@ -308,7 +328,7 @@ export const leaseService = {
   updateLease: async (leaseId, updates) => {
     try {
       console.log("Updating lease:", { leaseId, updates });
-      
+
       const response = await api.put(`/leases/${leaseId}/update`, updates);
       return response.data;
     } catch (error) {
