@@ -669,7 +669,7 @@ export default function TenantLeaseViewPage() {
             )}
 
             {/* Options */}
-            {statusConfig.actions.options.includes("message") && (
+            {/* {statusConfig.actions.options.includes("message") && (
               <button
                 onClick={() => setShowMessageModal(true)}
                 className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
@@ -677,7 +677,7 @@ export default function TenantLeaseViewPage() {
                 <MessageCircle size={20} />
                 Message Landlord
               </button>
-            )}
+            )} */}
           </div>
 
           {/* Waiting for landlord signature notice */}
@@ -1206,7 +1206,7 @@ export default function TenantLeaseViewPage() {
           </div>
 
           {/* Quick Links */}
-          <div className="bg-white border rounded-xl p-6">
+          {/* <div className="bg-white border rounded-xl p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
             <div className="space-y-2">
               <button
@@ -1257,7 +1257,7 @@ export default function TenantLeaseViewPage() {
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Lease Info */}
           <div className="bg-white border rounded-xl p-6">

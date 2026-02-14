@@ -619,7 +619,7 @@ export default function LeaseDetailPage() {
               )}
 
               {/* Message */}
-              {canMessage && (
+              {/* {canMessage && (
                 <button
                   onClick={() => setShowMessageModal(true)}
                   className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
@@ -627,7 +627,7 @@ export default function LeaseDetailPage() {
                   <MessageCircle className="h-5 w-5" />
                   Message Tenant
                 </button>
-              )}
+              )} */}
 
               {/* View Property */}
               {/* {lease.property?._id && (
