@@ -78,6 +78,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { leaseService } from "@/services/lease.service";
+import { handleDownload } from "@/app/dashboard/admin/leases/page";
 
 // Utility Functions
 const formatCurrency = (amount) => {
@@ -311,8 +312,8 @@ export default function LeaseDetailPage() {
   }, [lease?.status]);
 
   // Action handlers
-  const handleDownloadPDF = () => {
-    alert("PDF download will be available soon!");
+  const handleDownloadPDF = (id) => {
+    handleDownload(id)
   };
 
   const handleSendToTenant = async () => {
@@ -609,7 +610,7 @@ export default function LeaseDetailPage() {
               {/* Download PDF */}
               {canDownload && (
                 <button
-                  onClick={handleDownloadPDF}
+                  onClick={() => handleDownloadPDF(params?.id)}
                   className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
                 >
                   <Download className="h-5 w-5" />

@@ -299,7 +299,7 @@ export default function TenantLeasesPage() {
             </p>
           </div>
 
-          <div className="flex gap-3 mt-4 md:mt-0">
+          {/* <div className="flex gap-3 mt-4 md:mt-0">
             <button
               onClick={() => setViewMode(viewMode === "list" ? "card" : "list")}
               className="px-4 py-2 rounded-full border border-gray-200 flex items-center gap-2 hover:bg-gray-50"
@@ -312,14 +312,7 @@ export default function TenantLeasesPage() {
               {viewMode === "list" ? "Grid View" : "List View"}
             </button>
             
-            <button
-              onClick={handleApplyForProperty}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-            >
-              <PlusCircle className="w-4 h-4" />
-              Apply for Property
-            </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Statistics Cards */}

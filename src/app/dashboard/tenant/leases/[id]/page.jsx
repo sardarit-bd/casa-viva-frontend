@@ -63,6 +63,7 @@ import { leaseService } from "@/services/lease.service";
 import toast from "react-hot-toast";
 import LeaseStatusTimeline from "@/components/dashboard/Tenant/LeaseStatusTimeline";
 import axios from "axios";
+import { handleDownload } from "@/app/dashboard/admin/leases/page";
 // import LeaseStatusTimeline from "@/components/dashboard/Owner/leases/LeaseStatusTimeline";
 
 export default function TenantLeaseViewPage() {
@@ -224,6 +225,7 @@ export default function TenantLeaseViewPage() {
     try {
       // Implement PDF download logic
       console.log("Downloading PDF for lease:", lease._id);
+      handleDownload(lease?._id)
       toast.success("PDF download will be available soon");
     } catch (err) {
       toast.error("Failed to download PDF");
@@ -567,13 +569,13 @@ export default function TenantLeaseViewPage() {
               {statusConfig.icon}
               {statusConfig.label}
             </div>
-            <button
+            {/* <button
               onClick={handleDownloadPDF}
               disabled={!["fully_executed", "active", "expired"].includes(lease.status)}
               className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download size={18} />
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -624,7 +626,7 @@ export default function TenantLeaseViewPage() {
               <button
                 onClick={handleApproveAndSend}
                 disabled={submitting}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+                className="px-6 py-3 bg-[#004087] text-white rounded-lg flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -659,7 +661,7 @@ export default function TenantLeaseViewPage() {
             {statusConfig.actions.secondary === "download" && (
               <button
                 onClick={handleDownloadPDF}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+                className="px-6 py-3 bg-[#004087] text-white rounded-lg flex items-center justify-center gap-2"
               >
                 <Download size={20} />
                 Download PDF
@@ -682,12 +684,12 @@ export default function TenantLeaseViewPage() {
           {lease.status === "sent_to_landlord" && (
             <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
+                <Clock className="h-5 w-5 text-[#004087] mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-800">
+                  <p className="font-medium text-[#004087]">
                     Waiting for Landlord Signature
                   </p>
-                  <p className="text-sm text-blue-600 mt-1">
+                  <p className="text-sm text-[#004087] mt-1">
                     The lease has been sent to the landlord for their signature. 
                     You'll be notified when they sign, and then you can sign to finalize.
                   </p>
