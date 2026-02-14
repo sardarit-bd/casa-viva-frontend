@@ -10,6 +10,7 @@ import Loader from "../common/Loader";
 import HospitalSchoolFinder from "./NearbyFinderMap";
 
 export default function PropertyDetails({ property, user }) {
+    
     const router = useRouter();
     const [myLease, setMyLease] = useState(false)
     if (!property) {
@@ -107,6 +108,8 @@ export default function PropertyDetails({ property, user }) {
     let buttonText = "";
     if (!isLoggedIn) {
         buttonText = "Login to Request";
+    }else if(property?.isBooked){
+        buttonText = "Already Booked"
     } else if (!user?.verified) {
         buttonText = "Verify your Account";
     } else if (hasLease) {
@@ -117,8 +120,8 @@ export default function PropertyDetails({ property, user }) {
         buttonText = "Request to Buy";
     }
 
-    const isButtonDisabled = !isLoggedIn || !user?.verified || !isTenant || hasLease;
-
+    const isButtonDisabled = !isLoggedIn || !user?.verified || !isTenant || hasLease || property?.isBooked;
+    console.log(property?.isBooked)
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
 
@@ -151,7 +154,7 @@ export default function PropertyDetails({ property, user }) {
                     {/* Action Button - Placed after price and address for good visibility */}
                     <button
                         disabled={isButtonDisabled}
-                        className={`w-full py-3.5 px-6 rounded-xl font-semibold text-lg transition-all duration-200 ${hasLease || !user?.verified
+                        className={`w-full py-3.5 px-6 rounded-xl font-semibold text-lg transition-all duration-200 ${hasLease || !user?.verified || property?.isBooked
                             ? "bg-gray-400 text-white cursor-not-allowed"
                             : !isLoggedIn
                                 ? "bg-[#014087] hover:bg-[#014087]/90 text-white"

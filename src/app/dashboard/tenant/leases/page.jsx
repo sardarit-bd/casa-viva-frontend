@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import LeaseStatusBadge from "@/components/dashboard/Owner/leases/LeaseStatusBadge";
 import { leaseService } from "@/services/lease.service";
+import { handleDownload } from "../../admin/leases/page";
 
 export default function TenantLeasesPage() {
   const router = useRouter();
@@ -93,16 +94,6 @@ export default function TenantLeasesPage() {
 
   const handleApplyForProperty = () => {
     router.push("/dashboard/tenant/properties");
-  };
-
-  const handleDownload = async (id) => {
-    try {
-      // Implement PDF download functionality
-      console.log("Download lease PDF:", id);
-      alert("PDF download will be available soon");
-    } catch (err) {
-      console.error('Error downloading lease:', err);
-    }
   };
 
   const filteredLeases = leases.filter(lease => {
@@ -189,7 +180,7 @@ export default function TenantLeasesPage() {
         return (
           <button
             onClick={() => handleDownload(lease._id)}
-            className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1"
+            className="px-3 py-2 text-sm bg-[#004087] text-white rounded-lg hover:bg-[#004087] flex items-center gap-1"
           >
             <Download className="w-4 h-4" />
             Download PDF
@@ -369,7 +360,7 @@ export default function TenantLeasesPage() {
                   placeholder="Search by property name, address, or status..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#004087] focus:border-transparent"
                 />
               </div>
             </div>
@@ -379,7 +370,7 @@ export default function TenantLeasesPage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#004087] focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="pending_request">Pending Approval</option>
@@ -410,15 +401,6 @@ export default function TenantLeasesPage() {
               ? "Try changing your search or filter criteria" 
               : "Start by applying for a property to begin the lease process"}
           </p>
-          {!searchQuery && filterStatus === "all" && (
-            <button
-              onClick={handleApplyForProperty}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 mx-auto"
-            >
-              <PlusCircle className="w-5 h-5" />
-              Browse Available Properties
-            </button>
-          )}
         </div>
       )}
 
@@ -450,7 +432,7 @@ export default function TenantLeasesPage() {
                           </div>
                         </div>
                         <div>
-                          <div className="font-medium text-[#1F3A34] hover:text-blue-600 cursor-pointer" 
+                          <div className="font-medium text-[#1F3A34] hover:text-[#004087] cursor-pointer" 
                                onClick={() => handleView(lease._id)}>
                             {lease.property?.title || 'N/A'}
                           </div>
