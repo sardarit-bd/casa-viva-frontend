@@ -14,7 +14,6 @@ const LanguageSwitcher = () => {
     // Language flag mapping
     const languageFlags = {
         'en': '🇬🇧',
-        'bn': '🇧🇩',
         'es': '🇪🇸'
     };
 
