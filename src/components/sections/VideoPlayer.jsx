@@ -61,7 +61,7 @@ export default function VideoPlayer() {
     return (
         <div className="relative">
             {/* Video Container */}
-            <div className="relative w-[600px] h-[435px] rounded-3xl overflow-hidden group">
+            <div className="relative lg:max-w-[600px] h-[435px] rounded-3xl overflow-hidden group">
                 <video
                     ref={videoRef}
                     src={videoUrl}
