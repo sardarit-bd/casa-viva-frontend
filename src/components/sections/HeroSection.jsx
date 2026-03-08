@@ -4,7 +4,7 @@ import VideoPlayer from "./VideoPlayer";
 export default function LuxuryHero() {
 
     return (
-        <section className="bg-[#FFF7F3] py-30">
+        <section className="bg-[#FFF7F3] lg:py-30 py-12">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 {/* LEFT SIDE */}
                 <div>
