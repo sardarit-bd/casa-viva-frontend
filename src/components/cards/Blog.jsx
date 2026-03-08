@@ -49,10 +49,10 @@ export default function BlogCard({
                 {/* AUTHOR + DATE */}
                 <div className="mt-4 flex items-center justify-between text-gray-500 text-xs">
 
-                    <div className="flex items-center gap-1">
+                    {/* <div className="flex items-center gap-1">
                         <User size={14} />
                         <span>{author?.name}</span>
-                    </div>
+                    </div> */}
 
                     <div className="flex items-center gap-1">
                         <CalendarDays size={14} />
