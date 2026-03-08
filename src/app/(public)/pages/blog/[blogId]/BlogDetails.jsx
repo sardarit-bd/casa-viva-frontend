@@ -23,8 +23,8 @@ export default function BlogDetails({ blog }) {
 
             {/* META */}
             <div className="text-sm text-gray-500 mb-6 flex items-center gap-4">
-                <span>By {blog?.author?.name}</span>
-                <span>•</span>
+                {/* <span>By {blog?.author?.name}</span>
+                <span>•</span> */}
                 <span>{new Date(blog?.createdAt).toLocaleDateString()}</span>
                 <span>•</span>
                 <span className="text-emerald-600 font-medium">{blog?.category}</span>

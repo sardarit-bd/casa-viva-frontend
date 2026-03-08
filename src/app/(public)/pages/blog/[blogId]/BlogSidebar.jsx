@@ -8,10 +8,10 @@ export default function BlogSidebar({ category, date, author }) {
             <h3 className="text-lg font-semibold mb-4">Article Info</h3>
 
             <div className="space-y-4 text-sm text-gray-600">
-                <div>
+                {/* <div>
                     <p className=" text-gray-800"><b>Author: </b>  <span>{author}</span></p>
 
-                </div>
+                </div> */}
 
                 <div>
                     <p className=" text-gray-800"><b>Published: </b> <span>{new Date(date).toLocaleDateString()}</span></p>

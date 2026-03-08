@@ -101,7 +101,7 @@ export default function PostCard({ post }) {
         {/* Author info */}
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex justify-between items-center">
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               {post.author?.avatar && (
                 <img 
                   src={post.author.avatar} 
@@ -117,7 +117,7 @@ export default function PostCard({ post }) {
                   <span className="text-xs text-gray-500 block">{post.author.email}</span>
                 )}
               </div>
-            </div>
+            </div> */}
             <div className="flex items-center space-x-2">
               {post.tags && post.tags.length > 0 && (
                 <div className="flex gap-1">
