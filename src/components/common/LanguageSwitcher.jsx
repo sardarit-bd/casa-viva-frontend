@@ -78,6 +78,7 @@ const LanguageSwitcher = () => {
 
         destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
         destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
+        
         setCookie(null, COOKIE_NAME, '/auto/' + lang, {
             path: '/',
             domain: domain
@@ -85,7 +86,7 @@ const LanguageSwitcher = () => {
 
         setTimeout(() => {
             window.location.reload();
-        }, 10000)
+        }, 1000)
 
     };
     // Get current language details

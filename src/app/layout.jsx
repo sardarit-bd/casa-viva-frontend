@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
 
         <Script
           src="//translate.google.com/translate_a/element.js?cb=TranslateInit"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
       </head>
 
