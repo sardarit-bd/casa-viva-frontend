@@ -4,6 +4,27 @@ import { parseCookies, setCookie, destroyCookie } from 'nookies';
 
 // The following cookie name is important because it's Google-predefined for the translation engine purpose
 const COOKIE_NAME = 'googtrans';
+export const setLanguageCookie = (lang) => {
+    const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+
+    const isProd = hostname.endsWith("casavivadr.com");
+
+    const cookieValue = "/auto/" + lang;
+
+    // delete old cookies
+    document.cookie =
+        "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=casavivadr.com";
+
+    document.cookie =
+        "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.casavivadr.com";
+
+    document.cookie =
+        "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+
+    // set new cookie
+    document.cookie = `googtrans=${cookieValue}; path=/ ${isProd ? "; domain=.casavivadr.com" : ""
+        }`;
+};
 
 const LanguageSwitcher = () => {
     const [currentLanguage, setCurrentLanguage] = useState();
@@ -70,24 +91,8 @@ const LanguageSwitcher = () => {
 
     const switchLanguage = (lang) => () => {
 
-        const hostname = typeof window !== "undefined" ? window.location.hostname : "";
-        console.log(hostname)
-
-        const domain = hostname.includes("casavivadr.com") ? "casavivadr.com" : undefined;
-        console.log(domain)
-
-        destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
-        destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
-        
-        setCookie(null, COOKIE_NAME, '/auto/' + lang, {
-            path: '/',
-            domain: domain
-        });
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000)
-
+        setLanguageCookie(lang);
+        window.location.reload();
     };
     // Get current language details
     const getCurrentLanguage = () => {
