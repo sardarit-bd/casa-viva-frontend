@@ -85,7 +85,7 @@ const LanguageSwitcher = () => {
 
         setTimeout(() => {
             window.location.reload();
-        }, 1000)
+        }, 10000)
 
     };
     // Get current language details
