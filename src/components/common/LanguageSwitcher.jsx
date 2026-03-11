@@ -73,7 +73,7 @@ const LanguageSwitcher = () => {
         const hostname = typeof window !== "undefined" ? window.location.hostname : "";
         console.log(hostname)
 
-        const domain = hostname.includes("casavivadr.com") ? ".casavivadr.com" : undefined;
+        const domain = hostname.includes("casavivadr.com") ? "casavivadr.com" : undefined;
         console.log(domain)
 
         destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
