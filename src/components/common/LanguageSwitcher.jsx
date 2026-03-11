@@ -71,8 +71,10 @@ const LanguageSwitcher = () => {
     const switchLanguage = (lang) => () => {
 
         const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+        console.log(hostname)
 
         const domain = hostname.includes("casavivadr.com") ? ".casavivadr.com" : undefined;
+        console.log(domain)
 
         destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
         destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
@@ -81,7 +83,10 @@ const LanguageSwitcher = () => {
             domain: domain
         });
 
-        window.location.reload();
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000)
+
     };
     // Get current language details
     const getCurrentLanguage = () => {
