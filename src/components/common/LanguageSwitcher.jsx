@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { parseCookies, setCookie } from 'nookies';
+import { parseCookies, setCookie, destroyCookie } from 'nookies';
 
 // The following cookie name is important because it's Google-predefined for the translation engine purpose
 const COOKIE_NAME = 'googtrans';
@@ -63,13 +63,26 @@ const LanguageSwitcher = () => {
     }
 
     // The following function switches the current language
+    // const switchLanguage =  (lang) => () => {
+    //     setCookie(null, COOKIE_NAME, '/auto/' + lang);
+    //     window.location.reload();
+    // };
+
     const switchLanguage = (lang) => () => {
-        // We just need to set the related cookie and reload the page
-        // "/auto/" prefix is Google's definition as far as a cookie name
-        setCookie(null, COOKIE_NAME, '/auto/' + lang);
+
+        const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+
+        const domain = hostname.includes("casavivadr.com") ? ".casavivadr.com" : undefined;
+
+        destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
+        destroyCookie(null, COOKIE_NAME, { path: '/', domain: domain });
+        setCookie(null, COOKIE_NAME, '/auto/' + lang, {
+            path: '/',
+            domain: domain
+        });
+
         window.location.reload();
     };
-
     // Get current language details
     const getCurrentLanguage = () => {
         if (currentLanguage === 'auto') {
@@ -103,8 +116,8 @@ const LanguageSwitcher = () => {
             {/* Dropdown Menu */}
             <div
                 className={`absolute right-0 mt-2 bg-white border-[var(--color-primary)] rounded-[var(--radius-card)] shadow-[var(--shadow-medium)] z-50 min-w-[180px] overflow-hidden transition-all duration-200 transform origin-top ${openDropdown
-                        ? "opacity-100 scale-100 translate-y-0"
-                        : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                    ? "opacity-100 scale-100 translate-y-0"
+                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
                     }`}
                 style={{ opacity: openDropdown ? 'var(--container-opacity)' : '0' }}
             >
@@ -116,8 +129,8 @@ const LanguageSwitcher = () => {
                             setOpenDropdown(false);
                         }}
                         className={`flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 ${currentLanguage === ld.name || (currentLanguage === 'auto' && languageConfig.defaultLanguage === ld.name)
-                                ? "bg-[var(--color-primary)] text-white shadow-inner"
-                                : "hover:bg-[var(--color-background)] text-[var(--color-text)] hover:text-[var(--color-primary-hover)]"
+                            ? "bg-[var(--color-primary)] text-white shadow-inner"
+                            : "hover:bg-[var(--color-background)] text-[var(--color-text)] hover:text-[var(--color-primary-hover)]"
                             }`}
                     >
                         <span className="text-lg">{languageFlags[ld.name] || '🌐'}</span>
