@@ -4,6 +4,10 @@ import Providers from "./providers";
 import Script from "next/script";
 import TranslateReset from "@/components/TranslateReset";
 
+export const metadata = {
+  title: "Casa Viva",
+  description: "Manage your real state business"
+};
 
 export default function RootLayout({ children }) {
   return (
