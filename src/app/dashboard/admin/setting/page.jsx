@@ -28,6 +28,7 @@ export default function AdminSettingsPage() {
   const [instructionVideo, setInstructionVideo] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [name, setName] = useState(adminData?.name)
+  const [email, setEmail] = useState(adminData?.email)
   const [videoPreview, setVideoPreview] = useState('');
 
   // Form states
@@ -86,13 +87,16 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       await updateProfile({
-        name: name
+        name: name,
+        email: email
       })
 
-      toast.success("Name is Updated!")
+      toast.success("Data is Updated!")
     } catch (error) {
       console.error('Error updating admin:', error);
-      setErrors({ submit: 'Failed to update. Please try again.' });
+      const errorMsg = error?.response?.data?.message
+      console.log(errorMsg)
+      setErrors({ submit: errorMsg || "Failed to update. Please try again." });
     } finally {
       setSaving(false);
     }
@@ -118,7 +122,6 @@ export default function AdminSettingsPage() {
         { withCredentials: true }
       )
 
-      console.log(res)
       const imageUrl = res.data.data.url
       if (imageUrl) {
         const res = await axios.patch(
@@ -130,7 +133,6 @@ export default function AdminSettingsPage() {
         )
         console.log(res)
       }
-      console.log(imageUrl)
       setInstructionVideo(imageUrl)
     } catch (error) {
       console.error('Error uploading video:', error);
@@ -226,9 +228,9 @@ export default function AdminSettingsPage() {
                 </label>
                 <div className="flex items-center">
                   <input
-                    readOnly
                     type="email"
-                    defaultValue={adminData.email}
+                    defaultValue={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A34] focus:border-transparent"
                   />
                 </div>
